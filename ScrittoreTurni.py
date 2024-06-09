@@ -37,7 +37,6 @@ class StazionePartenza(BMenuItem):
 		msg.AddString("code",self.code)
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
-
 class StazioneArrivo(BMenuItem):
 	def __init__(self,cubie):
 		self.name=cubie[1]
@@ -46,6 +45,28 @@ class StazioneArrivo(BMenuItem):
 		msg.AddString("code",self.code)
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
+class TipoAcc(BMenuItem):
+	def __init__(self,cubie):
+		self.name=cubie[0]
+		self.code=cubie[1]
+		msg=BMessage(607)
+		msg.AddInt8("code",self.code)
+		msg.AddString("name",self.name)
+		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
+class ParteItem(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(608)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
+class TotaleItem(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(609)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
 class VettWindow(BWindow):
 	alertWind=[]
 	cp=None
@@ -53,20 +74,36 @@ class VettWindow(BWindow):
 	np=None
 	na=None
 	def __init__(self):
-		BWindow.__init__(self, BRect(200,170,800,270), "Vettura", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(200,170,800,278), "Vettura", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		rect=self.bckgnd.Bounds()
 		self.AddChild(self.bckgnd,None)
 		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
 		a=BFont()
-		self.name=BTextControl(BRect(8,8,rect.Width()-8,12+a.Size()),"nvett-nome", "N.vettura/VOC:","VOC",BMessage(1900))
-		self.oi=BTextControl(BRect(8,20+a.Size(),128,24+2*a.Size()),"ora_inizio", "Partenza ore:",str(5),BMessage(1901))
+		self.name=BTextControl(BRect(8,8,rect.Width()*2/3-8,12+a.Size()),"nvett-nome", "N.vettura/VOC:","VOC",BMessage(1900))
+		
+		self.menupt=BMenu("1")
+		self.menutt=BMenu("1")
+		self.menupt.SetLabelFromMarked(True)
+		self.menutt.SetLabelFromMarked(True)
+		self.menupt.AddItem(ParteItem(1))
+		self.menupt.AddItem(ParteItem(2))
+		self.menutt.AddItem(TotaleItem(1))
+		self.menutt.AddItem(TotaleItem(2))
+		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP)
+		self.mfparte.SetDivider(a.StringWidth("Parte "))
+		self.mftotale = BMenuField(BRect(rect.Width()*2/3+86, 8, rect.Width()*2/3+136, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale.SetDivider(a.StringWidth("di "))
+		self.bckgnd.AddChild(self.mfparte,None)
+		self.bckgnd.AddChild(self.mftotale,None)
+		
+		self.oi=BTextControl(BRect(8,28+a.Size(),128,32+2*a.Size()),"ora_inizio", "Partenza ore:",str(5),BMessage(1901))
 		#print(a.StringWidth("Arrivo ore:"))
 		self.oi.SetDivider(90.0)
-		self.mi=BTextControl(BRect(136,20+a.Size(),192,24+2*a.Size()),"min_inizio", "min:",str(58),BMessage(1902))
-		self.of=BTextControl(BRect(rect.Width()/2,20+a.Size(),rect.Width()/2+105,24+2*a.Size()),"ora_fine", "Arrivo ore:",str(6),BMessage(1903))
+		self.mi=BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio", "min:",str(58),BMessage(1902))
+		self.of=BTextControl(BRect(rect.Width()/2,28+a.Size(),rect.Width()/2+105,32+2*a.Size()),"ora_fine", "Arrivo ore:",str(6),BMessage(1903))
 		self.of.SetDivider(75.0)
-		self.mf=BTextControl(BRect(rect.Width()/2+113,20+a.Size(),rect.Width()/2+169,24+2*a.Size()),"min_fine", "min:",str(38),BMessage(1904))
+		self.mf=BTextControl(BRect(rect.Width()/2+113,28+a.Size(),rect.Width()/2+169,32+2*a.Size()),"min_fine", "min:",str(38),BMessage(1904))
 		self.bckgnd.AddChild(self.name,None)
 		self.bckgnd.AddChild(self.oi,None)
 		self.bckgnd.AddChild(self.mi,None)
@@ -82,10 +119,10 @@ class VettWindow(BWindow):
 		for z in legenda:
 			self.menup.AddItem(StazionePartenza(z))
 			self.menua.AddItem(StazioneArrivo(z))
-		self.pbar = BMenuField(BRect(200, 20+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', '', self.menup,B_FOLLOW_TOP)
+		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', '', self.menup,B_FOLLOW_TOP)
 		self.pbar.SetDivider(0)
 		self.bckgnd.AddChild(self.pbar,None)
-		self.abar = BMenuField(BRect(rect.Width()/2+177, 20+a.Size(), rect.Width()-8, 24+2*a.Size()), 'pop2', '',self.menua,B_FOLLOW_TOP)
+		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-8, 32+2*a.Size()), 'pop2', '',self.menua,B_FOLLOW_TOP)
 		self.abar.SetDivider(0)
 		self.bckgnd.AddChild(self.abar,None)
 	def checkvalues(self):
@@ -116,6 +153,14 @@ class VettWindow(BWindow):
 		elif msg.what==1002:
 			dop=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
 			doa=datetime.timedelta(hours=int(self.of.Text()),minutes=int(self.mf.Text()))
+			if self.cp == self.ca:
+				ask=BAlert('cle', "Spostamento da/per lo stesso luogo, aggiungere?", 'No', 'Sì',None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+				self.alertWind.append(ask)
+				ret=ask.Go()
+				if ret:
+					pass
+				else:
+					return
 			if doa-dop>datetime.timedelta(minutes=0):
 				mex=BMessage(1002)
 				mex.AddInt8("oi",int(self.oi.Text()))
@@ -187,30 +232,131 @@ class VettWindow(BWindow):
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
-
 class AccWindow(BWindow):
+	alertWind=[]
+	cp=None
+	ca=None
+	np=None
+	na=None
+	tipoacc=[("Accessori in partenza",1),("Accessori in arrivo",2),("Cambio volante in partenza",3),("Cambio volante in arrivo",4),("Parking in partenza",5),("Parking in arrivo",6),("Manovra",7),("Riserva",8)]
 	def __init__(self):
-		BWindow.__init__(self, BRect(200,150,800,450), "Accessori", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(250,190,850,298), "Accessori", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		self.AddChild(self.bckgnd,None)
 		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
-
+		a=BFont()
+		rect=self.bckgnd.Bounds()
+		
+		self.menuacc=BMenu("Tipo accessori")
+		self.menuacc.SetLabelFromMarked(True)
+		for y in self.tipoacc:
+			self.menuacc.AddItem(TipoAcc(y))
+		self.menuf = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuacc,B_FOLLOW_TOP)
+		self.menuf.SetDivider(0)
+		self.bckgnd.AddChild(self.menuf,None)
+		
+		self.treno=BTextControl(BRect(200,8,rect.Width()*2/3-8,12+a.Size()),"treno", "Treno:","",BMessage(1900))
+		self.treno.SetDivider(a.StringWidth("Treno:   "))
+		self.bckgnd.AddChild(self.treno,None)
+		
+		self.menupt=BMenu("1")
+		self.menutt=BMenu("1")
+		self.menupt.SetLabelFromMarked(True)
+		self.menutt.SetLabelFromMarked(True)
+		self.menupt.AddItem(ParteItem(1))
+		self.menupt.AddItem(ParteItem(2))
+		self.menutt.AddItem(TotaleItem(1))
+		self.menutt.AddItem(TotaleItem(2))
+		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP)
+		self.mfparte.SetDivider(a.StringWidth("Parte "))
+		self.mftotale = BMenuField(BRect(rect.Width()*2/3+86, 8, rect.Width()*2/3+136, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale.SetDivider(a.StringWidth("di "))
+		self.bckgnd.AddChild(self.mfparte,None)
+		self.bckgnd.AddChild(self.mftotale,None)
+		
+		
+		self.oi=BTextControl(BRect(8,28+a.Size(),128,32+2*a.Size()),"ora_inizio", "Inizio ore:",str(5),BMessage(1901))
+		#print(a.StringWidth("Arrivo ore:"))
+		self.oi.SetDivider(90.0)
+		self.mi=BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio", "min:",str(58),BMessage(1902))
+		self.of=BTextControl(BRect(rect.Width()/2,28+a.Size(),rect.Width()/2+105,32+2*a.Size()),"ora_fine", "Fine ore:",str(6),BMessage(1903))
+		self.of.SetDivider(75.0)
+		self.mf=BTextControl(BRect(rect.Width()/2+113,28+a.Size(),rect.Width()/2+169,32+2*a.Size()),"min_fine", "min:",str(38),BMessage(1904))
+		self.bckgnd.AddChild(self.oi,None)
+		self.bckgnd.AddChild(self.mi,None)
+		self.bckgnd.AddChild(self.of,None)
+		self.bckgnd.AddChild(self.mf,None)
+		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()/2+a.Size()+4,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1002),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.addBtn.SetEnabled(False)
+		self.bckgnd.AddChild(self.addBtn,None)
+		self.menup=BMenu("Stazione")
+		self.menua=BMenu("Stazione")
+		self.menup.SetLabelFromMarked(True)
+		self.menua.SetLabelFromMarked(True)
+		for z in legenda:
+			self.menup.AddItem(StazionePartenza(z))
+			self.menua.AddItem(StazioneArrivo(z))
+		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', '', self.menup,B_FOLLOW_TOP)
+		self.pbar.SetDivider(0)
+		self.bckgnd.AddChild(self.pbar,None)
+		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-8, 32+2*a.Size()), 'pop2', '',self.menua,B_FOLLOW_TOP)
+		self.abar.SetDivider(0)
+		self.bckgnd.AddChild(self.abar,None)
+	def MessageReceived(self, msg):
+		if msg.what==605:
+			self.cp = msg.FindString("code")
+			self.np = msg.FindString("name")
+			if self.checkvalues():
+				self.addBtn.SetEnabled(True)
+			#print(self.cp,self.np)
+		elif msg.what==606:
+			self.ca = msg.FindString("code")
+			self.na = msg.FindString("name")
+			if self.checkvalues():
+				self.addBtn.SetEnabled(True)
+		elif msg.what==607:
+			self.ca = msg.FindString("code")
+			self.na = msg.FindString("name")
+			if self.checkvalues():
+				self.addBtn.SetEnabled(True)
+	def QuitRequested(self):
+		self.Hide()
 class TrenoWindow(BWindow):
+	alertWind=[]
+	cp=None
+	ca=None
+	np=None
+	na=None
 	def __init__(self):
 		BWindow.__init__(self, BRect(200,150,800,450), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		self.AddChild(self.bckgnd,None)
-		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
-		
+		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)	
 class PausaWindow(BWindow):
 	def __init__(self):
-		BWindow.__init__(self, BRect(150,150,350,250), "Pausa", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(150,150,586,250), "Pausa", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		rect=self.bckgnd.Bounds()
 		self.AddChild(self.bckgnd,None)
 		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
 		a=BFont()
-		self.name=BTextControl(BRect(8,8,rect.Width()-8,12+a.Size()),"pausa_name", "Nome:","Pausa",BMessage(1902))
+		
+		self.menupt=BMenu("1")
+		self.menutt=BMenu("1")
+		self.menupt.SetLabelFromMarked(True)
+		self.menutt.SetLabelFromMarked(True)
+		self.menupt.AddItem(ParteItem(1))
+		self.menupt.AddItem(ParteItem(2))
+		self.menutt.AddItem(TotaleItem(1))
+		self.menutt.AddItem(TotaleItem(2))
+		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP)
+		self.mfparte.SetDivider(a.StringWidth("Parte "))
+		self.mftotale = BMenuField(BRect(rect.Width()*2/3+86, 8, rect.Width()*2/3+136, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale.SetDivider(a.StringWidth("di "))
+		self.bckgnd.AddChild(self.mfparte,None)
+		self.bckgnd.AddChild(self.mftotale,None)
+		
+		self.name=BTextControl(BRect(8,8,rect.Width()*2/3-8,12+a.Size()),"pausa_name", "Nome:","Pausa",BMessage(1902))
 		self.deltamvalue=BTextControl(BRect(8+rect.Width()/2,rect.Height()/2-a.Size(),rect.Width()-8,rect.Height()/2+a.Size()-4),"delta_min_value", "Minuti:",str(10),BMessage(1900))
 		self.deltaovalue=BTextControl(BRect(8,rect.Height()/2-a.Size(),rect.Width()/2-8,rect.Height()/2+a.Size()-4),"delta_ora_value", "Ore:",str(0),BMessage(1901))
 		self.bckgnd.AddChild(self.name,None)
@@ -255,7 +401,6 @@ class PausaWindow(BWindow):
 	def QuitRequested(self):
 		self.Hide()
 
-		
 class MainWindow(BWindow):
 	tmpWind=[]
 	tmpElem=[]
@@ -336,6 +481,16 @@ class MainWindow(BWindow):
 				self.vett_window = VettWindow()
 				self.tmpWind.append(self.vett_window)
 				self.vett_window.Show()
+		elif msg.what == 4:
+		#apri finestra inserimento accessori
+			try:
+				if self.acc_window.IsHidden():
+					self.acc_window.Show()
+				self.acc_window.Activate()
+			except:
+				self.acc_window = AccWindow()
+				self.tmpWind.append(self.acc_window)
+				self.acc_window.Show()
 		elif msg.what == 1800:
 		#controlla nome turno
 			try:
@@ -484,7 +639,15 @@ class MainWindow(BWindow):
 			itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 			r=self.listaturni.lv.AddUnder(vet,itm)
 			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+cit+2)
-			#BUG
+		elif msg.what ==1014:
+			vet=self.tmpElem[-2]
+			cit=msg.FindInt8("cit")
+			itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
+			print(itm.label)
+			titm=self.listaturni.lv.Superitem(itm)
+			#print(titm.label)
+			self.listaturni.lv.AddUnder(vet,titm)
+			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)#self.listaturni.lv.IndexOf(titm)+cit+2)
 		elif msg.what == 1002:
 		#aggiungi vettura
 			op=msg.FindInt8("oi")
@@ -605,7 +768,7 @@ class MainWindow(BWindow):
 					if titm != None:
 						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
 						#last item is an element, not a superitem
-						#cit=self.listaturni.lv.CountItemsUnder(titm,True)
+						cit=self.listaturni.lv.CountItemsUnder(titm,True)
 						#print(cit)
 						#if cit>0: #sarà sempre > 0 se non è un superitem
 						#	otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1).fine
@@ -618,9 +781,21 @@ class MainWindow(BWindow):
 							if differ > datetime.timedelta(minutes=0):
 								print("step 3.1")
 								#TODO aggiungi pausa
-								self.listaturni.lv.AddUnder(vet,titm)
-								con=self.listaturni.lv.CountItemsUnder(titm,True)
-								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(vet)+con-1)
+								minutes=(differ.seconds % 3600) // 60
+								hours=differ.days * 24 + differ.seconds // 3600
+								#print(hours,minutes)
+								mex=BMessage(1001)
+								mex.AddInt8("deltam",minutes)
+								mex.AddInt8("deltao",hours)
+								mex.AddString("name","Pausa")
+								be_app.WindowAt(0).PostMessage(mex)
+									
+								mx2=BMessage(1014)
+								mx2.AddInt8("cit",cit)
+								be_app.WindowAt(0).PostMessage(mx2)
+								#self.listaturni.lv.AddUnder(vet,titm)
+								#con=self.listaturni.lv.CountItemsUnder(titm,True)
+								#self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(vet)+con-1)
 							elif differ == datetime.timedelta(minutes=0):
 								print("step 3.2")
 								self.listaturni.lv.AddUnder(vet,titm)
@@ -675,8 +850,8 @@ class MainWindow(BWindow):
 #	def fine(self):
 #		return self.fine
 
-class VettItem(BListItem):
-	def __init__(self,name,inizio,fine,stp,sta):
+class AccItem(BListItem):
+	def __init__(self,tipo,name,inizio,fine,stp,sta,condotta,materiale,parteturno):
 		self.name=name
 		#self.label=self.name
 		fon=BFont()
@@ -692,7 +867,26 @@ class VettItem(BListItem):
 		mf=(fine.seconds % 3600) // 60
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
-		#self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		BListItem.__init__(self)
+class VettItem(BListItem):
+	def __init__(self,name,inizio,fine,stp,sta,parteturno):
+		self.name=name
+		#self.label=self.name
+		fon=BFont()
+		self.stp=stp
+		self.sta=sta
+		self.font_height_value=font_height()
+		fon.GetHeight(self.font_height_value)
+		self.inizio=inizio
+		self.fine=fine
+		mi=(inizio.seconds % 3600) // 60
+		oi=inizio.days * 24 + inizio.seconds // 3600
+		of=fine.days * 24 + fine.seconds // 3600
+		mf=(fine.seconds % 3600) // 60
+		self.iout=str(oi)+":"+str(mi)
+		self.fout=str(of)+":"+str(mf)
+		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine))
 		BListItem.__init__(self)
 
 	def DrawItem(self, owner, frame, complete):
@@ -726,7 +920,7 @@ class VettItem(BListItem):
 		#	owner.StrokeLine(sp,ep)
 		#owner.SetLowColor(255,255,255,255)
 class PausItem(BListItem):
-	def __init__(self,name,inizio,deltat,dove):
+	def __init__(self,name,inizio,deltat,dove,parteturno):
 		self.name=name
 		#self.label=self.name
 		fon=BFont()
@@ -744,7 +938,7 @@ class PausItem(BListItem):
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
 		#print("pausa fine",deltat)
-		#self.label=(self.name+"        "+dove[0]+"  "+dove[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		self.label=(self.name+"        "+dove[0]+"  "+dove[0]+"  "+str(self.inizio)+"  "+str(self.fine))
 		
 		BListItem.__init__(self)
 		
