@@ -25,10 +25,21 @@ from Be.Menu import menu_layout
 from Be import Entry
 from Be.Entry import entry_ref, get_ref_for_path
 
-import datetime
+import os,datetime
 
 cod_stazioni=[("UD","Udine"),("UDFS","Udine fascio sacca"),("BASL","Basiliano"),("CDRP","Codroipo"),("CSRS","Casarsa"),("CUS","Cusano"),("PN","Pordenone"),("FONT","Fontanafredda"),("SAC","Sacile"),("ORSG","Orsago"),("PIAN","Pianzano"),("CON","Conegliano"),("SUS","Susegana"),("SPR","Spresiano"),("LANC","Lancenigo"),("TVCL","Treviso centrale"),("TVDL","Treviso deposito"),("STRV","San Trovaso"),("PREG","Preganziol"),("MOGL","Mogliano Veneto"),("MSOS","Mestre ospedale"),("MSCL","Mestre centrale"),("MSDL","Mestre deposito"),("VEPM","Venezia porto marghera"),("VESL","Venezia Santa Lucia"),("BUT","Buttrio"),("MANZ","Manzano"),("SGAN","San Giovanni al Natisone"),("CORM","Cormons"),("GOCL","Gorizia centrale"),("SAGR","Sagrado"),("RON","Ronchi nord"),("MONF","Monfalcone"),("SIST","Sistiana"),("BVDA","Bivio d'Aurisina"),("MIRM","Miramare"),("TSCL","Trieste centrale"),("TSDL","Trieste deposito"),("TSA","Trieste airport"),("CRVG","Cervignano"),("SGIO","San Giorgio di Nogaro"),("LAT","Latisana"),("PGRU","Portogruaro"),("SSTI","San Stino di Livenza"),("SDON","San Donà di Piave"),("QUDA","Quarto d'Altino"),("SGDC","San Giovanni di Casarsa"),("SVIT","San Vito al Tagliamento"),("CORD","Cordovado Sesto"),("TEGL","Teglio veneto"),("SACL","Sacile San Liberale"),("BUDJ","Budoia"),("AVNO","Aviano"),("MONT","Montereale valcellina"),("MAN","Maniago"),("TRIC","Tricesimo"),("TARC","Tarcento"),("ARTG","Artegna"),("GEM","Gemona"),("VENZ","Venzone"),("CRNI","Carnia"),("PONT","Pontebba"),("UGOV","Ugovizza"),("TARB","Tarvisio boscoverde"),("PALM","Palmanova"),("RISN","Risano")]
 legenda = sorted(cod_stazioni, key=lambda x: x[1])
+
+class PButton(BButton):
+	def __init__(self,frame,name,label,msg,resizingMode,immagine):
+		self.immagine = immagine
+		self.frame = frame
+		BButton.__init__(self,frame,name,label,msg,resizingMode)
+
+	def Draw(self,rect):
+		BButton.Draw(self, rect)
+		inset = BRect(2, 2, self.frame.Width()-2, self.frame.Height()-2)
+		self.DrawBitmap(self.immagine,inset)
 class StazionePartenza(BMenuItem):
 	def __init__(self,cubie):
 		self.name=cubie[1]
@@ -298,7 +309,7 @@ class AccWindow(BWindow):
 		self.menupt.SetLabelFromMarked(True)
 		self.menupt.AddItem(ParteItem(1))
 		self.menupt.AddItem(ParteItem(2))
-		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+58 <-- it's ignored if I write 0 the item is fully visible
+		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+78 <-- it's ignored if I write 0 the item is fully visible
 		self.mfparte.SetDivider(a.StringWidth("Parte ")) #<- This works
 		self.bckgnd.AddChild(self.mfparte,None)
 		
@@ -331,6 +342,18 @@ class AccWindow(BWindow):
 		
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-38,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1003),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
+		#/boot/system/data/icons/haiku/actions/22/clock.svg
+		perc=BPath()
+		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/orloi2.jpg")#"/boot/home/Apps/ScrittoreTurni/orloi.jpg")
+		if ent.Exists():
+			ent.GetPath(perc)
+			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+			self.getTimeBtn=PButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,46+2*a.Size()),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
+		else:
+			lab="🕒"
+			self.getTimeBtn=BButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,32+2*a.Size()),'GetTimeButton',lab,BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.bckgnd.AddChild(self.getTimeBtn,None)
 		self.bckgnd.AddChild(self.addBtn,None)
 		self.menup=BMenu("Stazione")
 		self.menua=BMenu("Stazione")
@@ -339,10 +362,10 @@ class AccWindow(BWindow):
 		for z in legenda:
 			self.menup.AddItem(StazionePartenza(z))
 			self.menua.AddItem(StazioneArrivo(z))
-		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', 'prova', self.menup,B_FOLLOW_TOP)
+		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', '', self.menup,B_FOLLOW_TOP)
 		self.pbar.SetDivider(0)# <--------     This works!!!!!!!!!
 		self.bckgnd.AddChild(self.pbar,None)
-		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-8, 32+2*a.Size()), 'pop2', 'prova',self.menua,B_FOLLOW_TOP)
+		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-44, 32+2*a.Size()), 'pop2', '',self.menua,B_FOLLOW_TOP)
 		self.abar.SetDivider(0)# <--------     This works!!!!!!!!!
 		self.bckgnd.AddChild(self.abar,None)
 	def checkvalues(self):
@@ -432,6 +455,16 @@ class AccWindow(BWindow):
 				ask=BAlert('cle', "L'orario di fine accessori deve essere posteriore all'orario di inizio accessori", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 				self.alertWind.append(ask)
 				ask.Go()
+		elif msg.what == 1004:
+			#Recupera orario fine elemento precedente
+			lt=be_app.WindowAt(0).listaturni.lv
+			if lt.CountItems()>1:
+				if lt.CurrentSelection()>-1:
+					if type(lt.ItemAt(lt.CurrentSelection())) != BStringItem:
+						print("fine turno da recuperare",lt.ItemAt(lt.CurrentSelection()).fine)
+				else:
+					if type(lt.ItemAt(lt.CountItems()-1)) != BStringItem:
+						print("fine turno da recuperare",lt.ItemAt(lt.CountItems()-1).fine)
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
@@ -690,6 +723,9 @@ class MainWindow(BWindow):
 		#aggiungi pausa
 			dm=msg.FindInt8("deltam")
 			do=msg.FindInt8("deltao")
+			parte=msg.FindInt8("parte")
+			totale=msg.FindInt8("totale")
+			parteturno=(parte,totale)
 			dt = datetime.timedelta(hours=do,minutes=dm)
 			n=msg.FindString("name")
 			#print(self.listaturni.lv.CountItems())
@@ -710,7 +746,7 @@ class MainWindow(BWindow):
 							lastund=self.listaturni.lv.ItemUnderAt(selit,True,it-1)
 							i=lastund.fine #(or it-1)
 							sta=lastund.sta
-							pau=PausItem(n,i,dt,sta)
+							pau=PausItem(n,i,dt,sta,parteturno)
 							self.tmpElem.append(pau)
 							self.listaturni.lv.AddUnder(pau,selit)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
@@ -718,7 +754,7 @@ class MainWindow(BWindow):
 						#è un elemento
 						i=selit.fine
 						sta=selit.sta
-						pau=PausItem(n,i,dt,sta)
+						pau=PausItem(n,i,dt,sta,parteturno)
 						self.tmpElem.append(pau)
 						supit=self.listaturni.lv.Superitem(selit)
 						#it=self.listaturni.lv.CountItemsUnder(supit,True)
@@ -773,6 +809,7 @@ class MainWindow(BWindow):
 			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)#self.listaturni.lv.IndexOf(titm)+cit+2)
 		elif msg.what == 1002:
 		#aggiungi vettura
+			
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
 			oa=msg.FindInt8("of")
@@ -782,10 +819,12 @@ class MainWindow(BWindow):
 			nsp=msg.FindString("nsp")
 			nsa=msg.FindString("nsa")
 			n=msg.FindString("name")
+			parte=msg.FindInt8("parte")
+			totale=msg.FindInt8("totale")
 			dtp = datetime.timedelta(hours=op,minutes=mp)
 			dta = datetime.timedelta(hours=oa,minutes=ma)
 			if self.listaturni.lv.CountItems()>0:
-				vet=VettItem(n,dtp,dta,(csp,nsp),(csa,nsa))
+				vet=VettItem(n,dtp,dta,(csp,nsp),(csa,nsa),(parte,totale))
 				self.tmpElem.append(vet)
 				if self.listaturni.lv.CurrentSelection()>-1:
 					itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
@@ -913,6 +952,7 @@ class MainWindow(BWindow):
 					else:
 						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
 						self.listaturni.lv.AddUnder(vet,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
+			
 		elif msg.what == 1003:
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
@@ -964,7 +1004,7 @@ class AccItem(BListItem):
 		mf=(fine.seconds % 3600) // 60
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
-		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+materiale+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
 class VettItem(BListItem):
 	def __init__(self,name,inizio,fine,stp,sta,parteturno):
@@ -983,7 +1023,7 @@ class VettItem(BListItem):
 		mf=(fine.seconds % 3600) // 60
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
-		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
 
 	def DrawItem(self, owner, frame, complete):
@@ -1006,16 +1046,6 @@ class VettItem(BListItem):
 		owner.DrawString(self.iout,None)#str(self.inizio),None)
 		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.fout,None)#str(self.fine),None)
-		#if self.unread:
-		#	owner.SetFont(be_bold_font)
-		#else:
-		#	owner.SetFont(be_plain_font)
-		#owner.DrawString(self.label,None)
-		#if not self.consistent:
-		#	sp=BPoint(3,frame.bottom-((frame.bottom-frame.top)/2))
-		#	ep=BPoint(frame.right-3,frame.bottom-(frame.bottom-frame.top)/2)
-		#	owner.StrokeLine(sp,ep)
-		#owner.SetLowColor(255,255,255,255)
 class PausItem(BListItem):
 	def __init__(self,name,inizio,deltat,dove,parteturno):
 		self.name=name
@@ -1032,7 +1062,7 @@ class PausItem(BListItem):
 		mf=(self.fine.seconds % 3600) // 60
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
-		self.label=(self.name+"        "+dove[0]+"  "+dove[0]+"  "+str(self.inizio)+"  "+str(self.fine))
+		self.label=(self.name+"        "+dove[0]+"  "+dove[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
 		
 	def DrawItem(self, owner, frame, complete):
@@ -1058,8 +1088,6 @@ class PausItem(BListItem):
 		#	ep=BPoint(frame.right-3,frame.bottom-(frame.bottom-frame.top)/2)
 		#	owner.StrokeLine(sp,ep)
 		owner.SetLowColor(255,255,255,255)
-
-
 
 class ScrollView:
 	HiWhat = 53 #Doppioclick
