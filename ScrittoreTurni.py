@@ -287,7 +287,7 @@ class AccWindow(BWindow):
 		for y in self.tipoacc:
 			self.menuacc.AddItem(TipoAcc(y))
 		self.menuf = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuacc,B_FOLLOW_TOP)
-		self.menuf.SetDivider(0)
+		self.menuf.SetDivider(0) #<-This works
 		self.bckgnd.AddChild(self.menuf,None)
 		
 		self.treno=BTextControl(BRect(200,8,rect.Width()*2/3-8,12+a.Size()),"treno", "Treno:","",BMessage(1900))
@@ -299,7 +299,7 @@ class AccWindow(BWindow):
 		self.menupt.AddItem(ParteItem(1))
 		self.menupt.AddItem(ParteItem(2))
 		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP)
-		self.mfparte.SetDivider(a.StringWidth("Parte "))
+		self.mfparte.SetDivider(a.StringWidth("Parte ")) #<- This works
 		self.bckgnd.AddChild(self.mfparte,None)
 		
 		self.menutt=BMenu("1")
@@ -326,7 +326,7 @@ class AccWindow(BWindow):
 		for m in materiali:
 			self.menumat.AddItem(m)
 		self.mfmat = BMenuField(BRect(8, rect.Height()-38, rect.Width()/2-8, rect.Height()-8), 'materiale', 'Materiale:', self.menumat,B_FOLLOW_TOP)#48+2*a.Size(),44+3*a.Size()
-		self.mftotale.SetDivider(0)#a.StringWidth("Materiale:"))
+		self.mftotale.SetDivider(a.StringWidth("Materiale:")) #<- This is ignored, doesn't work
 		self.bckgnd.AddChild(self.mfmat,None)
 		
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-38,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1003),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
@@ -339,11 +339,11 @@ class AccWindow(BWindow):
 		for z in legenda:
 			self.menup.AddItem(StazionePartenza(z))
 			self.menua.AddItem(StazioneArrivo(z))
-		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', '', self.menup,B_FOLLOW_TOP)
-		self.pbar.SetDivider(0)
+		self.pbar = BMenuField(BRect(200, 28+a.Size(), rect.Width()/2-8, 32+2*a.Size()), 'pop1', 'prova', self.menup,B_FOLLOW_TOP)
+		self.pbar.SetDivider(0)# <--------     This works!!!!!!!!!
 		self.bckgnd.AddChild(self.pbar,None)
-		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-8, 32+2*a.Size()), 'pop2', '',self.menua,B_FOLLOW_TOP)
-		self.abar.SetDivider(0)
+		self.abar = BMenuField(BRect(rect.Width()/2+177, 28+a.Size(), rect.Width()-8, 32+2*a.Size()), 'pop2', 'prova',self.menua,B_FOLLOW_TOP)
+		self.abar.SetDivider(0)# <--------     This works!!!!!!!!!
 		self.bckgnd.AddChild(self.abar,None)
 	def checkvalues(self):
 		ret=True
