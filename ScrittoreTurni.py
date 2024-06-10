@@ -943,7 +943,6 @@ class MainWindow(BWindow):
 					#esiste superitem ovvero sono un elemento del turno
 						print("step 1, selezionato elemento di turno")
 						differ = dtp - itm.fine
-						print(differ)
 						if self.checkpreviouscompatibility(itm,vet):
 							if differ > datetime.timedelta(minutes=0):
 									print("step 1.2")
@@ -1069,10 +1068,124 @@ class MainWindow(BWindow):
 			dta = datetime.timedelta(hours=oa,minutes=ma)
 			if self.listaturni.lv.CountItems()>0:
 				acc=AccItem((nta,codacc),n,dtp,dta,(csp,nsp),(csa,nsa),(nta,codacc),materiale,(parte,totale))
+				self.tmpElem.append(acc)
+				if self.listaturni.lv.CurrentSelection()>-1:
+					itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
+					titm=self.listaturni.lv.Superitem(itm)
+					if titm != None: 
+					#esiste superitem ovvero sono un elemento del turno
+						print("step 1, selezionato elemento di turno")
+						differ = dtp - itm.fine
+						if self.checkpreviouscompatibility(itm,acc):
+							if differ > datetime.timedelta(minutes=0):
+									print("step 1.2")
+									#prepara BMessage(1001) e crea pausa
+									minutes=(differ.seconds % 3600) // 60
+									hours=differ.days * 24 + differ.seconds // 3600
+									mex=BMessage(1001)
+									mex.AddInt8("deltam",minutes)
+									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
+									mex.AddString("name","Pausa")
+									be_app.WindowAt(0).PostMessage(mex)
+									
+									mx2=BMessage(1012)
+									be_app.WindowAt(0).PostMessage(mx2)
+							elif differ == datetime.timedelta(minutes=0):
+									#aggiungi senza problemi
+									print("step 1.3")
+									self.listaturni.lv.AddUnder(acc,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.CurrentSelection())
+						else:
+							ask=BAlert('cle', "Mancata corrispondenza ora inizio accessori e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+							self.alertWind.append(ask)
+							ask.Go()				
+					else:
+						#Selezionato un superitem
+						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
+						self.listaturni.lv.Expand(itm)
+						print("step 2, selezionato turno")
+						cit=self.listaturni.lv.CountItemsUnder(itm,True)
+						if cit>0:
+							#controlla ultima ora di fine
+							otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).fine
+							differ = dtp - otpf
+							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),acc)
+							if proceed:
+								if differ > datetime.timedelta(minutes=0):
+									print("step 2.2")
+									#prepara BMessage(1001) e crea pausa
+									minutes=(differ.seconds % 3600) // 60
+									hours=differ.days * 24 + differ.seconds // 3600
+									mex=BMessage(1001)
+									mex.AddInt8("deltam",minutes)
+									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
+									mex.AddString("name","Pausa")
+									be_app.WindowAt(0).PostMessage(mex)
+									
+									mx2=BMessage(1013)
+									mx2.AddInt8("cit",cit)
+									be_app.WindowAt(0).PostMessage(mx2)
+								elif differ == datetime.timedelta(minutes=0):
+									#aggiungi senza problemi
+									print("step 2.3")
+									self.listaturni.lv.AddUnder(acc,itm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.CurrentSelection()+cit+1)
+							else:
+								ask=BAlert('cle', "Mancata corrispondenza ora inizio accessori e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+								self.alertWind.append(ask)
+								ask.Go()
+						else:
+							self.listaturni.lv.AddUnder(acc,itm)
+							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.CurrentSelection()+1)
+					self.listaturni.lv.Select(self.listaturni.lv.CurrentSelection())
+				else:
+					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
+					titm=self.listaturni.lv.Superitem(lastit)
+					if titm != None:
+						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
+						#last item is an element, not a superitem
+						cit=self.listaturni.lv.CountItemsUnder(titm,True)
+						#check if otpf è > di acc.inizio
+						proceed=self.checkpreviouscompatibility(lastit,acc)
+						if proceed:
+							differ=acc.inizio-lastit.fine
+							if differ > datetime.timedelta(minutes=0):
+								print("step 3.1")
+								#aggiungi pausa
+								minutes=(differ.seconds % 3600) // 60
+								hours=differ.days * 24 + differ.seconds // 3600
+								mex=BMessage(1001)
+								mex.AddInt8("deltam",minutes)
+								mex.AddInt8("deltao",hours)
+								mex.AddInt8("parte",parte)
+								mex.AddInt8("totale",totale)
+								mex.AddString("name","Pausa")
+								be_app.WindowAt(0).PostMessage(mex)
+									
+								mx2=BMessage(1014)
+								mx2.AddInt8("cit",cit)
+								be_app.WindowAt(0).PostMessage(mx2)
+							elif differ == datetime.timedelta(minutes=0):
+								#agiungi senza prolemi
+								print("step 3.2")
+								self.listaturni.lv.AddUnder(acc,titm)
+								con=self.listaturni.lv.CountItemsUnder(titm,True)
+								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.IndexOf(acc)+con-1)
+						else:
+							ask=BAlert('cle', "Mancata corrispondenza ora inizio accessori e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+							self.alertWind.append(ask)
+							ask.Go()
+					else:
+						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
+						self.listaturni.lv.AddUnder(acc,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 		return BWindow.MessageReceived(self,msg)
-	def checkpreviouscompatibility(self,prev,vet):
+	def checkpreviouscompatibility(self,prev,ittem):
 		ret = True
-		if prev.fine>vet.inizio:
+		if prev.fine>ittem.inizio:
 			ret=False
 		return ret
 	def QuitRequested(self):
@@ -1110,29 +1223,30 @@ class AccItem(BListItem):
 		self.label=(self.nta+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+self.materiale+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
 	def DrawItem(self, owner, frame, complete):
-		owner.SetHighColor(200,255,255,255)
-		owner.SetLowColor(0,0,0,0)
+		#owner.SetHighColor(200,255,255,255)
+		#owner.SetLowColor(0,0,0,0)
 		if self.IsSelected() or complete:
 			owner.SetHighColor(200,200,200,255)
 			owner.SetLowColor(200,200,200,255)
-		owner.FillRect(frame)
+			owner.FillRect(frame)
 		owner.SetHighColor(0,0,0,0)
 		owner.MovePenTo(frame.left+5,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.nta,None)
-		owner.MovePenTo(frame.left+50,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.name,None)
-		owner.MovePenTo(frame.left+100,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.stp[0],None)
-		owner.MovePenTo(frame.left+150,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.sta[0],None)
-		owner.MovePenTo(frame.left+200,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.fout,None)
+		owner.DrawString(self.name,None)
 		owner.MovePenTo(frame.left+300,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.materiale,None)
+		owner.DrawString(self.stp[0],None)
+		owner.MovePenTo(frame.left+350,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.sta[0],None)
 		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.iout,None)
+		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+500,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.materiale,None)
+		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
+		owner.SetLowColor(255,255,255,255)
 class VettItem(BListItem):
 	def __init__(self,name,inizio,fine,stp,sta,parteturno):
 		self.name=name
@@ -1164,17 +1278,17 @@ class VettItem(BListItem):
 		owner.SetHighColor(0,0,0,0)
 		owner.MovePenTo(frame.left+5,frame.bottom-self.font_height_value.descent)
 		owner.DrawString("Vettura",None)
-		owner.MovePenTo(frame.left+50,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.name,None)
-		owner.MovePenTo(frame.left+100,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.stp[0],None)
-		owner.MovePenTo(frame.left+150,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.sta[0],None)
-		owner.MovePenTo(frame.left+200,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.fout,None)
+		owner.DrawString(self.name,None)
+		owner.MovePenTo(frame.left+300,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.stp[0],None)
+		owner.MovePenTo(frame.left+350,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.sta[0],None)
 		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.iout,None)
+		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 class PausItem(BListItem):
 	def __init__(self,name,inizio,deltat,dove,parteturno):
@@ -1196,7 +1310,6 @@ class PausItem(BListItem):
 		self.fout=str(of)+":"+str(mf)
 		self.label=(self.name+"        "+dove[0]+"  "+dove[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
-		
 	def DrawItem(self, owner, frame, complete):
 		if self.IsSelected() or complete:
 			owner.SetHighColor(200,200,200,255)
@@ -1205,17 +1318,16 @@ class PausItem(BListItem):
 		owner.SetHighColor(0,0,0,0)
 		owner.MovePenTo(frame.left+5,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.name,None)
-		owner.MovePenTo(frame.left+100,frame.bottom-self.font_height_value.descent)
+		owner.MovePenTo(frame.left+300,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.stp[0],None)
-		owner.MovePenTo(frame.left+150,frame.bottom-self.font_height_value.descent)
+		owner.MovePenTo(frame.left+350,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.sta[0],None)
-		owner.MovePenTo(frame.left+200,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.iout,None)
-		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.fout,None)
 		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.iout,None)
+		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
-		
 		#if not self.consistent:
 		#	sp=BPoint(3,frame.bottom-((frame.bottom-frame.top)/2))
 		#	ep=BPoint(frame.right-3,frame.bottom-(frame.bottom-frame.top)/2)
