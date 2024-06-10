@@ -208,6 +208,8 @@ class VettWindow(BWindow):
 				mex.AddInt8("mi",int(self.mi.Text()))
 				mex.AddInt8("of",int(self.of.Text()))
 				mex.AddInt8("mf",int(self.mf.Text()))
+				mex.AddInt8("parte",self.parte)
+				mex.AddInt8("totale",self.totale)
 				mex.AddString("csp",self.cp)
 				mex.AddString("csa",self.ca)
 				mex.AddString("nsp",self.np)
@@ -280,8 +282,8 @@ class AccWindow(BWindow):
 	np=None
 	na=None
 	ta=None
-	mat=None
 	codacc=0
+	mat=None
 	parte=1
 	totale=1
 	tipoacc=[("Accessori in partenza",1),("Accessori in arrivo",2),("Cambio volante in partenza",3),("Cambio volante in arrivo",4),("Parking in partenza",5),("Parking in arrivo",6),("Cambio banco",7),("Tempi medi",8),("Riserva",9)]
@@ -507,6 +509,7 @@ class AccWindow(BWindow):
 				mex.AddString("nsa",self.na) #nome stazione arrivo
 				mex.AddString("nta",self.ta) #nome tipo accessori
 				mex.AddInt8("codacc",self.codacc) #codice accessori
+				mex.AddString("materiale",self.mat)
 				mex.AddInt8("parte",self.parte) #parte del turno
 				mex.AddInt8("totale",self.totale) #totale del turno
 				mex.AddString("name",self.treno.Text()) #nome accessori/numero treno
@@ -846,7 +849,7 @@ class MainWindow(BWindow):
 							#posso aggiungere perché è presente un rigo del turno
 							i=self.listaturni.lv.ItemUnderAt(litm,True,it-1).fine
 							sta=self.listaturni.lv.ItemUnderAt(litm,True,it-1).sta
-							pau=PausItem(n,i,dt,sta)
+							pau=PausItem(n,i,dt,sta,parteturno)
 							self.tmpElem.append(pau)
 							self.listaturni.lv.AddUnder(pau,litm)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
@@ -855,7 +858,7 @@ class MainWindow(BWindow):
 					else:
 						i=litm.fine
 						sta=litm.sta
-						pau=PausItem(n,i,dt,sta)
+						pau=PausItem(n,i,dt,sta,parteturno)
 						self.tmpElem.append(pau)
 						titm=self.listaturni.lv.Superitem(litm)
 						self.listaturni.lv.AddUnder(pau,titm)
@@ -881,7 +884,6 @@ class MainWindow(BWindow):
 			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)#self.listaturni.lv.IndexOf(titm)+cit+2)
 		elif msg.what == 1002:
 		#aggiungi vettura
-			
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
 			oa=msg.FindInt8("of")
@@ -915,6 +917,8 @@ class MainWindow(BWindow):
 									mex=BMessage(1001)
 									mex.AddInt8("deltam",minutes)
 									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
 									mex.AddString("name","Pausa")
 									be_app.WindowAt(0).PostMessage(mex)
 									
@@ -949,6 +953,8 @@ class MainWindow(BWindow):
 									mex=BMessage(1001)
 									mex.AddInt8("deltam",minutes)
 									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
 									mex.AddString("name","Pausa")
 									be_app.WindowAt(0).PostMessage(mex)
 									
@@ -964,23 +970,6 @@ class MainWindow(BWindow):
 								ask=BAlert('cle', "Mancata corrispondenza ora partenza vettura e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 								self.alertWind.append(ask)
 								ask.Go()
-							#if differ < datetime.timedelta(minutes=0):
-							#	print("step 2.1")
-							#	print("non va aggiunto")
-							#	ask=BAlert('cle', "La partenza e antecedente all\'ora di fine del rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
-							#	self.alertWind.append(ask)
-							#	ask.Go()
-							#elif differ > datetime.timedelta(minutes=0):
-							#	print("step 2.2")
-							#	print("aggiungi pausa")
-							#	#TODO prepara BMessage(1001) e crea pausa
-							#	self.listaturni.lv.AddUnder(vet,itm)
-							#	self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+cit+1)
-							#elif differ == datetime.timedelta(minutes=0):
-							#	print("step 2.3")
-							#	print("aggiungi senza problemi")
-							#	self.listaturni.lv.AddUnder(vet,itm)
-							#	self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+cit+1)
 						else:
 							self.listaturni.lv.AddUnder(vet,itm)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+1)
@@ -1004,6 +993,8 @@ class MainWindow(BWindow):
 								mex=BMessage(1001)
 								mex.AddInt8("deltam",minutes)
 								mex.AddInt8("deltao",hours)
+								mex.AddInt8("parte",parte)
+								mex.AddInt8("totale",totale)
 								mex.AddString("name","Pausa")
 								be_app.WindowAt(0).PostMessage(mex)
 									
@@ -1023,7 +1014,6 @@ class MainWindow(BWindow):
 					else:
 						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
 						self.listaturni.lv.AddUnder(vet,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
-			
 		elif msg.what == 1003:
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
@@ -1042,7 +1032,7 @@ class MainWindow(BWindow):
 			dtp = datetime.timedelta(hours=op,minutes=mp)
 			dta = datetime.timedelta(hours=oa,minutes=ma)
 			if self.listaturni.lv.CountItems()>0:
-				acc=AccItem(n,dtp,dta,(csp,nsp),(csa,nsa),(nta,codacc),(parte,totale))
+				acc=AccItem((nta,codacc),n,dtp,dta,(csp,nsp),(csa,nsa),(nta,codacc),materiale,(parte,totale))
 		return BWindow.MessageReceived(self,msg)
 	def checkpreviouscompatibility(self,prev,vet):
 		ret = True
@@ -1059,12 +1049,18 @@ class MainWindow(BWindow):
 		return BWindow.QuitRequested(self)
 
 class AccItem(BListItem):
-	def __init__(self,name,inizio,fine,stp,sta,tipo,materiale,parteturno):
+# AccItem((nta,codacc),n,dtp,dta,(csp,nsp),(csa,nsa),(nta,codacc),materiale,(parte,totale))
+	def __init__(self,ta,name,inizio,fine,stp,sta,tipo,materiale,parteturno):
 		self.name=name
 		#self.label=self.name
+		self.nta=ta[0]
+		self.codacc=ta[1]
 		fon=BFont()
 		self.stp=stp
 		self.sta=sta
+		self.materiale = materiale
+		self.parte=parteturno[0]
+		self.totale=parteturno[1]
 		self.font_height_value=font_height()
 		fon.GetHeight(self.font_height_value)
 		self.inizio=inizio
@@ -1075,8 +1071,33 @@ class AccItem(BListItem):
 		mf=(fine.seconds % 3600) // 60
 		self.iout=str(oi)+":"+str(mi)
 		self.fout=str(of)+":"+str(mf)
-		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+materiale+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
+		self.label=(self.nta+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+self.materiale+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
+	def DrawItem(self, owner, frame, complete):
+		owner.SetHighColor(200,255,255,255)
+		owner.SetLowColor(0,0,0,0)
+		if self.IsSelected() or complete:
+			owner.SetHighColor(200,200,200,255)
+			owner.SetLowColor(200,200,200,255)
+		owner.FillRect(frame)
+		owner.SetHighColor(0,0,0,0)
+		owner.MovePenTo(frame.left+5,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.nta,None)
+		owner.MovePenTo(frame.left+50,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.name,None)
+		owner.MovePenTo(frame.left+100,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.stp[0],None)
+		owner.MovePenTo(frame.left+150,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.sta[0],None)
+		owner.MovePenTo(frame.left+200,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.iout,None)
+		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+300,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.materiale,None)
+		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
+		
 class VettItem(BListItem):
 	def __init__(self,name,inizio,fine,stp,sta,parteturno):
 		self.name=name
@@ -1088,6 +1109,8 @@ class VettItem(BListItem):
 		fon.GetHeight(self.font_height_value)
 		self.inizio=inizio
 		self.fine=fine
+		self.parte=parteturno[0]
+		self.totale=parteturno[1]
 		mi=(inizio.seconds % 3600) // 60
 		oi=inizio.days * 24 + inizio.seconds // 3600
 		of=fine.days * 24 + fine.seconds // 3600
@@ -1096,7 +1119,6 @@ class VettItem(BListItem):
 		self.fout=str(of)+":"+str(mf)
 		self.label=("vettura"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
 		BListItem.__init__(self)
-
 	def DrawItem(self, owner, frame, complete):
 		owner.SetHighColor(200,255,255,255)
 		owner.SetLowColor(0,0,0,0)
@@ -1114,9 +1136,11 @@ class VettItem(BListItem):
 		owner.MovePenTo(frame.left+150,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.sta[0],None)
 		owner.MovePenTo(frame.left+200,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.iout,None)#str(self.inizio),None)
+		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.fout,None)#str(self.fine),None)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 class PausItem(BListItem):
 	def __init__(self,name,inizio,deltat,dove,parteturno):
 		self.name=name
@@ -1127,6 +1151,8 @@ class PausItem(BListItem):
 		fon.GetHeight(self.font_height_value)
 		self.inizio=inizio
 		self.fine=inizio + deltat
+		self.parte=parteturno[0]
+		self.totale=parteturno[1]
 		mi=(inizio.seconds % 3600) // 60
 		oi=inizio.days * 24 + inizio.seconds // 3600
 		of=self.fine.days * 24 + self.fine.seconds // 3600
@@ -1152,7 +1178,8 @@ class PausItem(BListItem):
 		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.fout,None)
-		
+		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 		
 		#if not self.consistent:
 		#	sp=BPoint(3,frame.bottom-((frame.bottom-frame.top)/2))
