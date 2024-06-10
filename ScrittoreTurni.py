@@ -307,7 +307,7 @@ class AccWindow(BWindow):
 		self.menutt.AddItem(TotaleItem(1))
 		self.menutt.AddItem(TotaleItem(2))
 		self.mftotale = BMenuField(BRect(rect.Width()*2/3+116, 8, rect.Width()*2/3+186, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
-		self.mftotale.SetDivider(a.StringWidth("di  "))
+		self.mftotale.SetDivider(a.StringWidth("di  "))#<---- this doesn't work
 		self.bckgnd.AddChild(self.mftotale,None)
 		
 		self.oi = BTextControl(BRect(8,28+a.Size(),128,32+2*a.Size()),"ora_inizio", "Inizio ore:",str(5),BMessage(1901))
