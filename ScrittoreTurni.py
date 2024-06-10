@@ -404,11 +404,40 @@ class AccWindow(BWindow):
 		elif msg.what==607:
 			#stabilisto tipo accessori
 			self.codacc = msg.FindInt8("code")
+			print(self.codacc)
 			self.ta = msg.FindString("name")
 			if self.mat!=None:
-				print("stabilisco ora fine predefinita")
-			#if self.checkvalues():
-			#	self.addBtn.SetEnabled(True)
+				datoi=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
+				if self.codacc == 1:
+					#usa accp
+					delt=datetime.timedelta(minutes=self.accp)
+				elif self.codacc == 2:
+					#usa acca
+					delt=datetime.timedelta(minutes=self.acca)
+				elif self.codacc == 3:
+					#cv in partenza
+					delt=datetime.timedelta(minutes=15)
+				elif self.codacc == 4:
+					#cv in arrivo
+					delt=datetime.timedelta(minutes=10)
+				elif self.codacc == 5:
+					#usa prkp
+					delt=datetime.timedelta(minutes=self.prkp)
+				elif self.codacc == 6:
+					#usa prka
+					delt=datetime.timedelta(minutes=self.prka)
+				elif self.codacc == 7:
+					#cambio banco
+					delt=datetime.timedelta(minutes=1)
+				elif self.codacc == 8:
+					#tempi medi di manovra
+					delt=datetime.timedelta(minutes=10)
+				elif self.codacc == 9:
+					#riserva
+					delt=datetime.timedelta(minutes=0)
+				dtout=datoi+delt
+				self.mf.SetText(str((dtout.seconds % 3600) // 60))
+				self.of.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 608:
 			self.parte = msg.FindInt8("code")
@@ -424,7 +453,38 @@ class AccWindow(BWindow):
 			self.prka=msg.FindInt8("prka")
 			self.mat=msg.FindString("name")
 			if self.codacc!=0:
-				print("stabilisco ora fine predefinita")
+				datoi=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
+				if self.codacc == 1:
+					#usa accp
+					delt=datetime.timedelta(minutes=self.accp)
+				elif self.codacc == 2:
+					#usa acca
+					delt=datetime.timedelta(minutes=self.acca)
+				elif self.codacc == 3:
+					#cv in partenza
+					delt=datetime.timedelta(minutes=15)
+				elif self.codacc == 4:
+					#cv in arrivo
+					delt=datetime.timedelta(minutes=10)
+				elif self.codacc == 5:
+					#usa prkp
+					delt=datetime.timedelta(minutes=self.prkp)
+				elif self.codacc == 6:
+					#usa prka
+					delt=datetime.timedelta(minutes=self.prka)
+				elif self.codacc == 7:
+					#cambio banco
+					delt=datetime.timedelta(minutes=1)
+				elif self.codacc == 8:
+					#tempi medi di manovra
+					delt=datetime.timedelta(minutes=10)
+				elif self.codacc == 9:
+					#riserva
+					delt=datetime.timedelta(minutes=0)
+				dtout=datoi+delt
+				self.mf.SetText(str((dtout.seconds % 3600) // 60))
+				self.of.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1003:
 			dop=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
 			doa=datetime.timedelta(hours=int(self.of.Text()),minutes=int(self.mf.Text()))
@@ -459,12 +519,24 @@ class AccWindow(BWindow):
 			#Recupera orario fine elemento precedente
 			lt=be_app.WindowAt(0).listaturni.lv
 			if lt.CountItems()>1:
+				doit=False
 				if lt.CurrentSelection()>-1:
-					if type(lt.ItemAt(lt.CurrentSelection())) != BStringItem:
-						print("fine turno da recuperare",lt.ItemAt(lt.CurrentSelection()).fine)
+					selitm=lt.ItemAt(lt.CurrentSelection())
+					if type(selitm) != BStringItem:
+						orario=selitm.fine
+						sta=selitm.sta
+						doit=True
 				else:
-					if type(lt.ItemAt(lt.CountItems()-1)) != BStringItem:
-						print("fine turno da recuperare",lt.ItemAt(lt.CountItems()-1).fine)
+					lastitm=lt.ItemAt(lt.CountItems()-1)
+					if type(lastitm) != BStringItem:
+						orario=lastitm.fine
+						sta=lastitm.sta
+						doit=True
+				if doit:
+					self.menup.FindItem(sta[1]).SetMarked(True)
+					self.mi.SetText(str((orario.seconds % 3600) // 60))
+					self.oi.SetText(str(orario.days * 24 + orario.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
@@ -840,7 +912,6 @@ class MainWindow(BWindow):
 									#prepara BMessage(1001) e crea pausa
 									minutes=(differ.seconds % 3600) // 60
 									hours=differ.days * 24 + differ.seconds // 3600
-									print(hours,minutes)
 									mex=BMessage(1001)
 									mex.AddInt8("deltam",minutes)
 									mex.AddInt8("deltao",hours)
