@@ -139,6 +139,19 @@ class VettWindow(BWindow):
 		self.bckgnd.AddChild(self.mf,None)
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()/2+a.Size()+4,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1002),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
+		
+		perc=BPath()
+		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/orloi2.jpg")#"/boot/home/Apps/ScrittoreTurni/orloi.jpg")
+		if ent.Exists():
+			ent.GetPath(perc)
+			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+			self.getTimeBtn=PButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,46+2*a.Size()),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
+		else:
+			lab="🕒"
+			self.getTimeBtn=BButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,32+2*a.Size()),'GetTimeButton',lab,BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.bckgnd.AddChild(self.getTimeBtn,None)
+		
 		self.bckgnd.AddChild(self.addBtn,None)
 		self.menup=BMenu("Stazione")
 		self.menua=BMenu("Stazione")
@@ -220,6 +233,30 @@ class VettWindow(BWindow):
 				ask=BAlert('cle', "L'orario di arrivo deve essere posteriore all'orario di partenza", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 				self.alertWind.append(ask)
 				ask.Go()
+		elif msg.what == 1004:
+			#Recupera orario fine elemento precedente
+			lt=be_app.WindowAt(0).listaturni.lv
+			if lt.CountItems()>1:
+				doit=False
+				if lt.CurrentSelection()>-1:
+					selitm=lt.ItemAt(lt.CurrentSelection())
+					if type(selitm) != BStringItem:
+						orario=selitm.fine
+						sta=selitm.sta
+						doit=True
+				else:
+					lastitm=lt.ItemAt(lt.CountItems()-1)
+					if type(lastitm) != BStringItem:
+						orario=lastitm.fine
+						sta=lastitm.sta
+						doit=True
+				if doit:
+					self.menup.FindItem(sta[1]).SetMarked(True)
+					self.cp=sta[0]
+					self.np=sta[1]
+					self.mi.SetText(str((orario.seconds % 3600) // 60))
+					self.oi.SetText(str(orario.days * 24 + orario.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1901:
 			try:
 				numb=int(self.oi.Text())
@@ -344,7 +381,7 @@ class AccWindow(BWindow):
 		
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-38,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1003),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
-		#/boot/system/data/icons/haiku/actions/22/clock.svg
+		
 		perc=BPath()
 		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
 		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/orloi2.jpg")#"/boot/home/Apps/ScrittoreTurni/orloi.jpg")
@@ -537,6 +574,8 @@ class AccWindow(BWindow):
 						doit=True
 				if doit:
 					self.menup.FindItem(sta[1]).SetMarked(True)
+					self.cp=sta[0]
+					self.np=sta[1]
 					self.mi.SetText(str((orario.seconds % 3600) // 60))
 					self.oi.SetText(str(orario.days * 24 + orario.seconds // 3600))
 			self.addBtn.SetEnabled(self.checkvalues())
@@ -636,12 +675,10 @@ class PausaWindow(BWindow):
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
-
 class MainWindow(BWindow):
 	tmpWind=[]
 	tmpElem=[]
 	alertWind=[]
-	
 	Menus = (
 		('File', ((1, 'Carica turno'),(2, 'Salva turno'),(3, 'Chiudi turno'),(None, None),(int(AppDefs.B_QUIT_REQUESTED), 'Esci'))),('Aggiungi', ((4, 'Accessori'),(5, 'Vettura'),(6, 'Treno'),(7, 'Pausa'))),('Elaborazione', ((10, 'Estrai treni'),(11, 'Componi treni-acc'),(42, 'Crea giornate'))),
 		('Aiuto', ((8, 'Judimi'),(23, 'Informazioni')))
@@ -693,7 +730,6 @@ class MainWindow(BWindow):
 		self.listaturni.sv.ResizeTo(x-self.listaturni.sv.Frame().left-2,self.box.Bounds().Height()-barheight-4	)
 		self.listaturni.lv.ResizeTo(self.listaturni.sv.Bounds().Width(),self.listaturni.sv.Bounds().Height()-4)
 		BWindow.FrameResized(self,x,y)
-
 	def MessageReceived(self, msg):
 		if msg.what == 7:
 		#apri finestra inserimento pausa
@@ -1097,7 +1133,6 @@ class AccItem(BListItem):
 		owner.DrawString(self.materiale,None)
 		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
-		
 class VettItem(BListItem):
 	def __init__(self,name,inizio,fine,stp,sta,parteturno):
 		self.name=name
