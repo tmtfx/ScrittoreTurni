@@ -298,7 +298,7 @@ class AccWindow(BWindow):
 		self.menupt.SetLabelFromMarked(True)
 		self.menupt.AddItem(ParteItem(1))
 		self.menupt.AddItem(ParteItem(2))
-		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP)
+		self.mfparte = BMenuField(BRect(rect.Width()*2/3+8, 8, rect.Width()*2/3+78, 12+a.Size()), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+58 <-- it's ignored if I write 0 the item is fully visible
 		self.mfparte.SetDivider(a.StringWidth("Parte ")) #<- This works
 		self.bckgnd.AddChild(self.mfparte,None)
 		
@@ -306,8 +306,8 @@ class AccWindow(BWindow):
 		self.menutt.SetLabelFromMarked(True)
 		self.menutt.AddItem(TotaleItem(1))
 		self.menutt.AddItem(TotaleItem(2))
-		self.mftotale = BMenuField(BRect(rect.Width()*2/3+116, 8, rect.Width()*2/3+186, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
-		self.mftotale.SetDivider(a.StringWidth("di  "))#<---- this doesn't work
+		self.mftotale = BMenuField(BRect(rect.Width()*2/3+86, 8, rect.Width()*2/3+186, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale.SetDivider(a.StringWidth("di"))#<---- this doesn't work
 		self.bckgnd.AddChild(self.mftotale,None)
 		
 		self.oi = BTextControl(BRect(8,28+a.Size(),128,32+2*a.Size()),"ora_inizio", "Inizio ore:",str(5),BMessage(1901))
