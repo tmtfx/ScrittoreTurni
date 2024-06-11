@@ -79,6 +79,22 @@ class TipoAcc(BMenuItem):
 		msg.AddInt8("code",self.code)
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
+class TipoAccp(BMenuItem):
+	def __init__(self,cubie):
+		self.name=cubie[0]
+		self.code=cubie[1]
+		msg=BMessage(707)
+		msg.AddInt8("code",self.code)
+		msg.AddString("name",self.name)
+		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
+class TipoAcca(BMenuItem):
+	def __init__(self,cubie):
+		self.name=cubie[0]
+		self.code=cubie[1]
+		msg=BMessage(708)
+		msg.AddInt8("code",self.code)
+		msg.AddString("name",self.name)
+		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
 class ParteItem(BMenuItem):
 	def __init__(self,valore):
 		self.name=valore
@@ -357,7 +373,7 @@ class AccWindow(BWindow):
 		self.menutt.AddItem(TotaleItem(1))
 		self.menutt.AddItem(TotaleItem(2))
 		self.mftotale = BMenuField(BRect(rect.Width()*2/3+86, 8, rect.Width()*2/3+186, 12+a.Size()), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
-		self.mftotale.SetDivider(a.StringWidth("di"))#<---- this doesn't work
+		self.mftotale.SetDivider(a.StringWidth("di  "))
 		self.bckgnd.AddChild(self.mftotale,None)
 		
 		self.oi = BTextControl(BRect(8,28+a.Size(),128,32+2*a.Size()),"ora_inizio", "Inizio ore:",str(5),BMessage(1901))
@@ -376,7 +392,7 @@ class AccWindow(BWindow):
 		for m in materiali:
 			self.menumat.AddItem(m)
 		self.mfmat = BMenuField(BRect(8, rect.Height()-38, rect.Width()/2-8, rect.Height()-8), 'materiale', 'Materiale:', self.menumat,B_FOLLOW_TOP)#48+2*a.Size(),44+3*a.Size()
-		self.mftotale.SetDivider(a.StringWidth("Materiale:")) #<- This is ignored, doesn't work
+		#self.mfmat.SetDivider(a.StringWidth("Materiale:  "))
 		self.bckgnd.AddChild(self.mfmat,None)
 		
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-38,rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1003),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
@@ -595,7 +611,8 @@ class TrenoWindow(BWindow):
 	mat=None
 	parte=1
 	totale=1
-	tipoacc=[("Accessori in partenza",1),("Accessori in arrivo",2),("Cambio volante in partenza",3),("Cambio volante in arrivo",4),("Parking in partenza",5),("Parking in arrivo",6),("Cambio banco",7),("Tempi medi",8),("Riserva",9)]
+	tipoaccp=[("Accessori in partenza",1),("Cambio volante in partenza",3),("Parking in partenza",5)]
+	tipoacca=[("Accessori in arrivo",2),("Cambio volante in arrivo",4),("Parking in arrivo",6),("Cambio banco",7)]
 	def __init__(self):
 		BWindow.__init__(self, BRect(300,150,1000,550), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
@@ -612,8 +629,8 @@ class TrenoWindow(BWindow):
 		self.bckgnd.AddChild(self.chkaccp,None)
 		self.menuaccp=BMenu("Tipo accessori")
 		self.menuaccp.SetLabelFromMarked(True)
-		for y in self.tipoacc:
-			self.menuaccp.AddItem(TipoAcc(y))
+		for y in self.tipoaccp:
+			self.menuaccp.AddItem(TipoAccp(y))
 		self.menufp = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuaccp,B_FOLLOW_TOP)
 		self.menufp.SetDivider(0) #<-This works
 		self.boxaccp.AddChild(self.menufp,None)
@@ -630,8 +647,8 @@ class TrenoWindow(BWindow):
 		
 		self.menuacca=BMenu("Tipo accessori")
 		self.menuacca.SetLabelFromMarked(True)
-		for y in self.tipoacc:
-			self.menuacca.AddItem(TipoAcc(y))
+		for y in self.tipoacca:
+			self.menuacca.AddItem(TipoAcca(y))
 		self.menufa = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuacca,B_FOLLOW_TOP)
 		self.menufa.SetDivider(0) #<-This works
 		self.boxacca.AddChild(self.menufa,None)
