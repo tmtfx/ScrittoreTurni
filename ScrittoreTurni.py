@@ -796,11 +796,11 @@ class MainWindow(BWindow):
 			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
 			#self.getTimeBtn=PButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,46+2*a.Size()),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
 			self.deselectBtn=PButton(BRect(bckgnd_bounds.right-32, 4+barheight, bckgnd_bounds.right-2,34+barheight),'DeselectBtn','▤',BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT,img1)#▤⌧
-			tmprect=self.deselectBtn.Bounds()
-			print(tmprect.Width(),tmprect.Height())
+			#tmprect=self.deselectBtn.Bounds()
+			#print(tmprect.Width(),tmprect.Height())
 		else:
 			lab="▤"
-			self.deselectBtn=BButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,32+2*a.Size()),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
+			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
 		#self.deselectBtn=PButton(BRect(305, 4+barheight, 445,a.Size()),'DeselectBtn','▤',BMessage(1802),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)#▤⌧
 		self.box.AddChild(self.deselectBtn, None)
 		
