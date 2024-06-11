@@ -56,6 +56,14 @@ class StazioneArrivo(BMenuItem):
 		msg.AddString("code",self.code)
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
+class Condotta(BMenuItem):
+	def __init__(self,cubie):
+		self.code = cubie[1]
+		self.name = cubie[0]
+		msg = BMessage(808)
+		msg.AddInt8("code",self.code)
+		msg.AddString("name",self.name)
+		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
 class Materiale(BMenuItem):
 	def __init__(self,data):
 		self.name=data[0]
@@ -70,7 +78,7 @@ class Materiale(BMenuItem):
 		msg.AddInt8("prka",data[4])
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
-materiali=[Materiale(("Rock",35,10,25,10)),Materiale(("563/564",35,10,25,10)),Materiale(("Ale/Aln 501/502",25,10,15,10)),Materiale(("Blues",35,10,25,10)),Materiale(("464/MD/Viv",35,20,25,10)),Materiale(("464+464/MD",60,40,25,10))] #TODO aggiungere accessori predefiniti
+materiali=[Materiale(("Rock",30,15,25,10)),Materiale(("563/564",30,15,25,10)),Materiale(("Ale/Aln 501/502",25,10,20,10)),Materiale(("Blues",25,10,20,10)),Materiale(("464/MD/Viv",40,20,25,10)),Materiale(("464+464/MD",55,30,25,10))] #TODO aggiungere accessori predefiniti
 class TipoAcc(BMenuItem):
 	def __init__(self,cubie):
 		self.name=cubie[0]
@@ -613,8 +621,9 @@ class TrenoWindow(BWindow):
 	totale=1
 	tipoaccp=[("Accessori in partenza",1),("Cambio volante in partenza",3),("Parking in partenza",5)]
 	tipoacca=[("Accessori in arrivo",2),("Cambio volante in arrivo",4),("Parking in arrivo",6),("Cambio banco",7)]
+	tipocond=[("Agente solo",1),("Agente Unico",2),("Doppio Agente/1",3),("Doppio Agente/2",4)]
 	def __init__(self):
-		BWindow.__init__(self, BRect(300,150,1000,550), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(300,150,1000,400), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		self.AddChild(self.bckgnd,None)
 		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
@@ -668,8 +677,89 @@ class TrenoWindow(BWindow):
 		self.mftotale = BMenuField(BRect(86, rect.Height()-32-a.Size(), 166, rect.Height()-8), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
 		self.mftotale.SetDivider(a.StringWidth("di "))
 		self.bckgnd.AddChild(self.mftotale,None)
-
 		
+		self.oip = BTextControl(BRect(12,28+a.Size(),132,32+2*a.Size()),"ora_inizio_p", "Inizio ore:",str(5),BMessage(1901))
+		self.oip.SetDivider(90.0)
+		self.mip = BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio_p", "min:",str(58),BMessage(1902))
+		self.ofp = BTextControl(BRect(12,56+a.Size(),132,60+2*a.Size()),"ora_fine_p", "Fine ore:",str(6),BMessage(1903))
+		self.ofp.SetDivider(75.0)
+		self.mfp = BTextControl(BRect(136,56+a.Size(),192,60+2*a.Size()),"min_fine_p", "min:",str(38),BMessage(1904))
+		self.boxaccp.AddChild(self.oip,None)
+		self.boxaccp.AddChild(self.mip,None)
+		self.boxaccp.AddChild(self.ofp,None)
+		self.boxaccp.AddChild(self.mfp,None)
+		
+		self.oia = BTextControl(BRect(12,28+a.Size(),132,32+2*a.Size()),"ora_inizio_a", "Inizio ore:",str(5),BMessage(1901))
+		self.oia.SetDivider(90.0)
+		self.mia = BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio_a", "min:",str(58),BMessage(1902))
+		self.ofa = BTextControl(BRect(12,56+a.Size(),132,60+2*a.Size()),"ora_fine_a", "Fine ore:",str(6),BMessage(1903))
+		self.ofa.SetDivider(75.0)
+		self.mfa = BTextControl(BRect(136,56+a.Size(),192,60+2*a.Size()),"min_fine_a", "min:",str(38),BMessage(1904))
+		self.boxacca.AddChild(self.oia,None)
+		self.boxacca.AddChild(self.mia,None)
+		self.boxacca.AddChild(self.ofa,None)
+		self.boxacca.AddChild(self.mfa,None)
+		
+		self.menup=BMenu("Stazione")
+		self.menua=BMenu("Stazione")
+		self.menup.SetLabelFromMarked(True)
+		self.menua.SetLabelFromMarked(True)
+		for z in legenda:
+			self.menup.AddItem(StazionePartenza(z))
+			self.menua.AddItem(StazioneArrivo(z))
+		self.pstr = BStringView(BRect(rect.Width()/3+8, 32, rect.Width()/2-8, 52),'string_part','Partenza:',B_FOLLOW_TOP)
+		self.bckgnd.AddChild(self.pstr,None)
+		self.astr = BStringView(BRect(rect.Width()/2+8, 32, rect.Width()*2/3-8, 52),'string_arr','Arrivo:',B_FOLLOW_TOP)
+		self.bckgnd.AddChild(self.astr,None)
+		self.pbar = BMenuField(BRect(rect.Width()/3+8, 52, rect.Width()/2-8, 72), 'pop1', '', self.menup,B_FOLLOW_TOP)
+		self.pbar.SetDivider(0)
+		self.bckgnd.AddChild(self.pbar,None)
+		self.abar = BMenuField(BRect(rect.Width()/2+8, 52, rect.Width()*2/3-8, 72), 'pop2', '',self.menua,B_FOLLOW_TOP)
+		self.abar.SetDivider(0)
+		self.bckgnd.AddChild(self.abar,None)
+		
+		# TODO
+		# TODO   cambiare i BMessage dei vari BTextControl e compagnia bella
+		# TODO
+		
+		
+		self.oit = BTextControl(BRect(rect.Width()/3+8,82,rect.Width()/3+48,102),"ora_inizio_treno", "h:",str(5),BMessage(1901))
+		self.oit.SetDivider(self.bckgnd.StringWidth("h: "))
+		self.mit = BTextControl(BRect(rect.Width()/3+52,82,rect.Width()/3+98,102),"min_inizio_treno", "m:",str(58),BMessage(1902))
+		self.mit.SetDivider(self.bckgnd.StringWidth("m: "))
+		self.oft = BTextControl(BRect(rect.Width()/2+8,82,rect.Width()/2+48,102),"ora_fine_treno", "h:",str(6),BMessage(1903))
+		self.oft.SetDivider(self.bckgnd.StringWidth("h: "))
+		self.mft = BTextControl(BRect(rect.Width()/2+52,82,rect.Width()/2+98,102),"min_fine_treno", "m:",str(38),BMessage(1904))
+		self.mft.SetDivider(self.bckgnd.StringWidth("m: "))
+		self.bckgnd.AddChild(self.oit,None)
+		self.bckgnd.AddChild(self.mit,None)
+		self.bckgnd.AddChild(self.oft,None)
+		self.bckgnd.AddChild(self.mft,None)
+		
+		
+		
+		
+		#82-102
+		self.cond=BMenu("Tipo condotta")
+		self.cond.SetLabelFromMarked(True)
+		for z in self.tipocond:
+			self.cond.AddItem(Condotta(z))
+		self.condmf = BMenuField(BRect(rect.Width()/3+8, 112, rect.Width()*2/3-8, 132), 'pop1', 'Condotta:', self.cond,B_FOLLOW_TOP)
+		self.condmf.SetDivider(80.0)
+		self.bckgnd.AddChild(self.condmf,None)
+		
+		#112-132
+		self.menumat = BMenu("Materiale rotabile")
+		self.menumat.SetLabelFromMarked(True)
+		for m in materiali:
+			self.menumat.AddItem(m)
+		self.mfmat = BMenuField(BRect(rect.Width()/3+8, 142, rect.Width()*2/3-8, 162), 'materiale', 'Materiale:', self.menumat,B_FOLLOW_TOP)#48+2*a.Size(),44+3*a.Size()
+		self.mfmat.SetDivider(80.0)
+		self.bckgnd.AddChild(self.mfmat,None)
+		
+		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-32-a.Size(),rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1002),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.addBtn.SetEnabled(False)
+		self.bckgnd.AddChild(self.addBtn,None)
 	def MessageReceived(self, msg):
 		if msg.what == 1500:
 			if self.chkaccp.Value()==0:
