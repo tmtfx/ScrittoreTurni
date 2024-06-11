@@ -38,7 +38,7 @@ class PButton(BButton):
 
 	def Draw(self,rect):
 		BButton.Draw(self, rect)
-		inset = BRect(2, 2, self.frame.Width()-2, self.frame.Height()-2)
+		inset = BRect(4, 4, self.frame.Width()-4, self.frame.Height()-4)#(2, 2, self.frame.Width()-2, self.frame.Height()-2)
 		self.DrawBitmap(self.immagine,inset)
 class StazionePartenza(BMenuItem):
 	def __init__(self,cubie):
@@ -588,11 +588,84 @@ class TrenoWindow(BWindow):
 	ca=None
 	np=None
 	na=None
+	tap=None
+	codaccp=0
+	taa=None
+	codacca=0
+	mat=None
+	parte=1
+	totale=1
+	tipoacc=[("Accessori in partenza",1),("Accessori in arrivo",2),("Cambio volante in partenza",3),("Cambio volante in arrivo",4),("Parking in partenza",5),("Parking in arrivo",6),("Cambio banco",7),("Tempi medi",8),("Riserva",9)]
 	def __init__(self):
-		BWindow.__init__(self, BRect(200,150,800,450), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(300,150,1000,550), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		self.AddChild(self.bckgnd,None)
-		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)	
+		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
+		a=BFont()
+		rect=self.bckgnd.Bounds()
+		
+		self.boxaccp = BBox(BRect(8,32,rect.Width()/3-8,rect.Height()-46),"Box_acc_partenza",0x0202|0x0404,border_style.B_FANCY_BORDER)
+		self.bckgnd.AddChild(self.boxaccp,None)
+		baprect=self.boxaccp.Bounds()
+		self.chkaccp = BCheckBox(BRect(8,8,rect.Width()/3-8,28),"CheckBox_acc_partenza","Accessori partenza",BMessage(1500))
+		#self.chkaccp.SetValue(True)
+		self.bckgnd.AddChild(self.chkaccp,None)
+		self.menuaccp=BMenu("Tipo accessori")
+		self.menuaccp.SetLabelFromMarked(True)
+		for y in self.tipoacc:
+			self.menuaccp.AddItem(TipoAcc(y))
+		self.menufp = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuaccp,B_FOLLOW_TOP)
+		self.menufp.SetDivider(0) #<-This works
+		self.boxaccp.AddChild(self.menufp,None)
+		
+		self.name=BTextControl(BRect(rect.Width()/3+8,8,rect.Width()*2/3-8,12+a.Size()),"ntreno", "Numero treno:","1234",BMessage(1900))
+		self.bckgnd.AddChild(self.name,None)
+		
+		self.boxacca = BBox(BRect(rect.Width()*2/3+8,32,rect.Width()-8,rect.Height()-46),"Box_acc_arrivo",0x0202|0x0404,border_style.B_FANCY_BORDER)
+		self.bckgnd.AddChild(self.boxacca,None)
+		baarect=self.boxacca.Bounds()
+		self.chkacca = BCheckBox(BRect(rect.Width()*2/3+8,8,rect.Width()-8,28),"CheckBox_acc_arrivo","Accessori arrivo",BMessage(1501))
+		#self.chkacca.SetValue(True)
+		self.bckgnd.AddChild(self.chkacca,None)
+		
+		self.menuacca=BMenu("Tipo accessori")
+		self.menuacca.SetLabelFromMarked(True)
+		for y in self.tipoacc:
+			self.menuacca.AddItem(TipoAcc(y))
+		self.menufa = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuacca,B_FOLLOW_TOP)
+		self.menufa.SetDivider(0) #<-This works
+		self.boxacca.AddChild(self.menufa,None)
+		
+		self.menupt=BMenu("1")
+		self.menupt.SetLabelFromMarked(True)
+		self.menupt.AddItem(ParteItem(1))
+		self.menupt.AddItem(ParteItem(2))
+		self.mfparte = BMenuField(BRect(8, rect.Height()-32-a.Size(),78 , rect.Height()-8), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+78 <-- it's ignored if I write 0 the item is fully visible
+		self.mfparte.SetDivider(a.StringWidth("Parte "))
+		self.bckgnd.AddChild(self.mfparte,None)
+		
+		self.menutt=BMenu("1")
+		self.menutt.SetLabelFromMarked(True)
+		self.menutt.AddItem(TotaleItem(1))
+		self.menutt.AddItem(TotaleItem(2))
+		self.mftotale = BMenuField(BRect(86, rect.Height()-32-a.Size(), 166, rect.Height()-8), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale.SetDivider(a.StringWidth("di "))
+		self.bckgnd.AddChild(self.mftotale,None)
+
+		
+	def MessageReceived(self, msg):
+		if msg.what == 1500:
+			if self.chkaccp.Value()==0:
+				self.boxaccp.Show()
+			else:
+				self.boxaccp.Hide()
+		elif msg.what == 1501:
+			if self.chkacca.Value()==0:
+				self.boxacca.Show()
+			else:
+				self.boxacca.Hide()
+	def QuitRequested(self):
+		self.Hide()
 class PausaWindow(BWindow):
 	parte=1
 	totale=1
@@ -710,10 +783,28 @@ class MainWindow(BWindow):
 		self.box.AddChild(self.listaturni.sv, None)
 		self.turno=BTextControl(BRect(4,4+barheight,150,a.Size()),"turn_name", "FV:","1000",BMessage(1800))
 		self.box.AddChild(self.turno, None)
-		self.addBtn=BButton(BRect(160, 4+barheight, 300,a.Size()),'AddBtn','Aggiungi turno',BMessage(1801),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.addBtn=BButton(BRect(160, 4+barheight, 300,a.Size()),'AddBtn','Aggiungi turno',BMessage(1801),B_FOLLOW_TOP|B_FOLLOW_LEFT)
 		self.box.AddChild(self.addBtn, None)
-		self.remBtn=BButton(BRect(305, 4+barheight, 445,a.Size()),'RemBtn','Rimuovi turno/elemento',BMessage(1802),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.remBtn=BButton(BRect(305, 4+barheight, 445,a.Size()),'RemBtn','Rimuovi turno/elemento',BMessage(1802),B_FOLLOW_TOP|B_FOLLOW_LEFT)
 		self.box.AddChild(self.remBtn, None)
+		
+		perc=BPath()
+		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/deselect.jpg")#"/boot/home/Apps/ScrittoreTurni/orloi.jpg")
+		if ent.Exists():
+			ent.GetPath(perc)
+			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+			#self.getTimeBtn=PButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,46+2*a.Size()),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
+			self.deselectBtn=PButton(BRect(bckgnd_bounds.right-32, 4+barheight, bckgnd_bounds.right-2,34+barheight),'DeselectBtn','▤',BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT,img1)#▤⌧
+			tmprect=self.deselectBtn.Bounds()
+			print(tmprect.Width(),tmprect.Height())
+		else:
+			lab="▤"
+			self.deselectBtn=BButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,32+2*a.Size()),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
+		#self.deselectBtn=PButton(BRect(305, 4+barheight, 445,a.Size()),'DeselectBtn','▤',BMessage(1802),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)#▤⌧
+		self.box.AddChild(self.deselectBtn, None)
+		
+		
 	def FrameResized(self,x,y):
 		resiz=False
 		if x<974:
@@ -751,6 +842,16 @@ class MainWindow(BWindow):
 				self.vett_window = VettWindow()
 				self.tmpWind.append(self.vett_window)
 				self.vett_window.Show()
+		elif msg.what == 6:
+		#apri finestra inserimento treno
+			try:
+				if self.treno_window.IsHidden():
+					self.treno_window.Show()
+				self.treno_window.Activate()
+			except:
+				self.treno_window = TrenoWindow()
+				self.tmpWind.append(self.treno_window)
+				self.treno_window.Show()
 		elif msg.what == 4:
 		#apri finestra inserimento accessori
 			try:
