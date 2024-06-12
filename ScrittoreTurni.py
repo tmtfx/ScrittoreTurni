@@ -715,11 +715,6 @@ class TrenoWindow(BWindow):
 		self.abar.SetDivider(0)
 		self.bckgnd.AddChild(self.abar,None)
 		
-		# TODO
-		# TODO   cambiare i BMessage dei vari BTextControl e compagnia bella
-		# TODO
-		
-		
 		self.oit = BTextControl(BRect(rect.Width()/3+8,82,rect.Width()/3+48,102),"ora_inizio_treno", "h:",str(5),BMessage(1905))
 		self.oit.SetDivider(self.bckgnd.StringWidth("h: "))
 		self.mit = BTextControl(BRect(rect.Width()/3+52,82,rect.Width()/3+98,102),"min_inizio_treno", "m:",str(58),BMessage(1906))
@@ -732,9 +727,6 @@ class TrenoWindow(BWindow):
 		self.bckgnd.AddChild(self.mit,None)
 		self.bckgnd.AddChild(self.oft,None)
 		self.bckgnd.AddChild(self.mft,None)
-		
-		
-		
 		
 		#82-102
 		self.cond=BMenu("Tipo condotta")
@@ -794,7 +786,7 @@ class TrenoWindow(BWindow):
 				ret=False
 			dtit=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
 			dtft=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
-			if dtit>dtft:
+			if dtit>=dtft:
 				ret=False
 			if self.chkaccp.Value()==0:
 				dtap=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
@@ -966,7 +958,6 @@ class TrenoWindow(BWindow):
 			try:
 				if -1<int(self.oit.Text())<24:
 					self.oit.MarkAsInvalid(False)
-					#check validity of self.mit
 					mitvalid=False
 					try:
 						if -1<int(self.mit.Text())<60:
@@ -1089,6 +1080,59 @@ class TrenoWindow(BWindow):
 			except:
 				self.mft.MarkAsInvalid(True)
 			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1112:
+			#dopt=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
+			#doat=datetime.timedelta(hours=int(self.of.Text()),minutes=int(self.mf.Text()))
+			if self.chkaccp.Value()==0:
+				mex=BMessage(1003)
+				mex.AddInt8("oi",int(self.oip.Text())) #ora inizio
+				mex.AddInt8("mi",int(self.mip.Text())) #minuto inizio
+				mex.AddInt8("of",int(self.oit.Text())) #ora fine
+				mex.AddInt8("mf",int(self.mit.Text())) #minuto fine
+				mex.AddString("csp",self.cp) #codice stazione partenza
+				mex.AddString("csa",self.cp) #codice stazione arrivo
+				mex.AddString("nsp",self.np) #nome stazione partenza
+				mex.AddString("nsa",self.np) #nome stazione arrivo
+				mex.AddString("nta",self.tap) #nome tipo accessori
+				mex.AddInt8("codacc",self.codaccp) #codice accessori
+				mex.AddString("materiale",self.mat)
+				mex.AddInt8("parte",self.parte) #parte del turno
+				mex.AddInt8("totale",self.totale) #totale del turno
+				mex.AddString("name",self.name.Text()) #nome accessori/numero treno
+				be_app.WindowAt(0).PostMessage(mex)
+			mex=BMessge(1102)
+			mex.AddInt32("name",int(self.name.Text()))
+			mex.AddInt8("oi",int(self.oit.Text())) #ora inizio
+			mex.AddInt8("mi",int(self.mit.Text())) #minuto inizio
+			mex.AddInt8("of",int(self.oft.Text())) #ora fine
+			mex.AddInt8("mf",int(self.mft.Text())) #minuto fine
+			mex.AddString("csp",self.cp) #codice stazione partenza
+			mex.AddString("csa",self.ca) #codice stazione arrivo
+			mex.AddString("nsp",self.np) #nome stazione partenza
+			mex.AddString("nsa",self.na) #nome stazione arrivo
+			mex.AddString("ncond",self.ncond) # nome tipo condotta
+			mex.AddInt8("ccond",self.ccond) # codice tipo condotta
+			mex.AddString("materiale",self.mat)
+			mex.AddInt8("parte",self.parte) #parte del turno
+			mex.AddInt8("totale",self.totale) #totale del turno
+			be_app.WindowAt(0).PostMessage(mex)
+			if self.chkacca.Value()==0:
+				mex=BMessage(1003)
+				mex.AddInt8("oi",int(self.oft.Text())) #ora inizio
+				mex.AddInt8("mi",int(self.mft.Text())) #minuto inizio
+				mex.AddInt8("of",int(self.ofa.Text())) #ora fine
+				mex.AddInt8("mf",int(self.mfa.Text())) #minuto fine
+				mex.AddString("csp",self.ca) #codice stazione partenza
+				mex.AddString("csa",self.ca) #codice stazione arrivo
+				mex.AddString("nsp",self.na) #nome stazione partenza
+				mex.AddString("nsa",self.na) #nome stazione arrivo
+				mex.AddString("nta",self.taa) #nome tipo accessori
+				mex.AddInt8("codacc",self.codacca) #codice accessori
+				mex.AddString("materiale",self.mat)
+				mex.AddInt8("parte",self.parte) #parte del turno
+				mex.AddInt8("totale",self.totale) #totale del turno
+				mex.AddString("name",self.name.Text()) #nome accessori/numero treno
+				be_app.WindowAt(0).PostMessage(mex)
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
@@ -1723,6 +1767,57 @@ class MainWindow(BWindow):
 					wind.Quit()
 		return BWindow.QuitRequested(self)
 
+
+class TrenoItem(BListItem):
+	def __init__(self,name,inizio,fine,stp,sta,tipocond,materiale,parteturno):
+		fon=BFont()
+		self.materiale = materiale
+		self.parte=parteturno[0]
+		self.totale=parteturno[1]
+		self.font_height_value=font_height()
+		fon.GetHeight(self.font_height_value)
+		self.ccond=tipocond[1]
+		self.ncond=tipocond[0]
+		self.name=name
+		self.inizio=inizio
+		self.fine=fine
+		self.stp=stp
+		self.sta=sta
+		mi=(inizio.seconds % 3600) // 60
+		oi=inizio.days * 24 + inizio.seconds // 3600
+		of=fine.days * 24 + fine.seconds // 3600
+		mf=(fine.seconds % 3600) // 60
+		self.iout=str(oi)+":"+str(mi)
+		self.fout=str(of)+":"+str(mf)
+		self.label=("Condotta"+"  "+self.name+"  "+stp[0]+"  "+sta[0]+"  "+str(self.inizio)+"  "+str(self.fine)+"  "+self.ncond+"  "+self.materiale+"  "+str(parteturno[0])+"/"+str(parteturno[1]))
+		BListItem.__init__(self)
+	def DrawItem(self, owner, frame, complete):
+		owner.SetHighColor(200,255,200,255)
+		owner.SetLowColor(0,0,0,0)
+		if self.IsSelected() or complete:
+			owner.SetHighColor(200,200,200,255)
+			owner.SetLowColor(200,200,200,255)
+		owner.FillRect(frame)
+		owner.SetHighColor(0,0,0,0)
+		owner.MovePenTo(frame.left+5,frame.bottom-self.font_height_value.descent)
+		owner.DrawString("condotta",None)
+		owner.MovePenTo(frame.left+250,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.name,None)
+		owner.MovePenTo(frame.left+300,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.stp[0],None)
+		owner.MovePenTo(frame.left+350,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.sta[0],None)
+		owner.MovePenTo(frame.left+400,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.iout,None)
+		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.fout,None)
+		owner.MovePenTo(frame.left+500,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.ncond,None)
+		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.materiale,None)
+		owner.MovePenTo(frame.left+700,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
+		owner.SetLowColor(255,255,255,255)
 class AccItem(BListItem):
 # AccItem((nta,codacc),n,dtp,dta,(csp,nsp),(csa,nsa),(nta,codacc),materiale,(parte,totale))
 	def __init__(self,ta,name,inizio,fine,stp,sta,tipo,materiale,parteturno):
@@ -1768,9 +1863,9 @@ class AccItem(BListItem):
 		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.fout,None)
-		owner.MovePenTo(frame.left+500,frame.bottom-self.font_height_value.descent)
-		owner.DrawString(self.materiale,None)
 		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
+		owner.DrawString(self.materiale,None)
+		owner.MovePenTo(frame.left+700,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 		owner.SetLowColor(255,255,255,255)
 class VettItem(BListItem):
@@ -1814,7 +1909,7 @@ class VettItem(BListItem):
 		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.fout,None)
-		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
+		owner.MovePenTo(frame.left+700,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 class PausItem(BListItem):
 	def __init__(self,name,inizio,deltat,dove,parteturno):
@@ -1852,7 +1947,7 @@ class PausItem(BListItem):
 		owner.DrawString(self.iout,None)
 		owner.MovePenTo(frame.left+450,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(self.fout,None)
-		owner.MovePenTo(frame.left+600,frame.bottom-self.font_height_value.descent)
+		owner.MovePenTo(frame.left+700,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 		#if not self.consistent:
 		#	sp=BPoint(3,frame.bottom-((frame.bottom-frame.top)/2))
