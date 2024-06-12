@@ -792,6 +792,18 @@ class TrenoWindow(BWindow):
 				ret=False
 			elif self.parte>self.totale:
 				ret=False
+			dtit=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
+			dtft=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
+			if dtit>dtft:
+				ret=False
+			if self.chkaccp.Value()==0:
+				dtap=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
+				if dtap>dtit:
+					ret=False
+			if self.chkacca.Value()==0:
+				dtaa=datetime.timedelta(hours=int(self.ofa.Text()),minutes=int(self.mfa.Text()))
+				if dtaa<dtft:
+					ret=False
 		return ret
 	def MessageReceived(self, msg):
 		if msg.what == 1500:
@@ -913,6 +925,43 @@ class TrenoWindow(BWindow):
 				self.name.MarkAsInvalid(False)
 			except:
 				self.name.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1901:
+			try:
+				if -1<int(self.oip.Text())<24:
+					self.oip.MarkAsInvalid(False)
+				else:
+					self.oip.MarkAsInvalid(True)
+			except:
+				self.name.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1902:
+			try:
+				if -1<int(self.mip.Text())<60:
+					self.mip.MarkAsInvalid(False)
+				else:
+					self.mip.MarkAsInvalid(True)
+			except:
+				self.name.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1903:
+			try:
+				if -1<int(self.ofa.Text())<24:
+					self.ofa.MarkAsInvalid(False)
+				else:
+					self.ofa.MarkAsInvalid(True)
+			except:
+				self.name.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1904:
+			try:
+				if -1<int(self.mfa.Text())<60:
+					self.mfa.MarkAsInvalid(False)
+				else:
+					self.mfa.MarkAsInvalid(True)
+			except:
+				self.name.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1905:
 			try:
 				if -1<int(self.oit.Text())<24:
@@ -943,6 +992,7 @@ class TrenoWindow(BWindow):
 					self.oit.MarkAsInvalid(True)
 			except:
 				self.oit.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1906:
 			try:
 				if -1<int(self.mit.Text())<60:
@@ -972,6 +1022,7 @@ class TrenoWindow(BWindow):
 					self.mit.MarkAsInvalid(True)
 			except:
 				self.mit.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1907:
 			try:
 				if -1<int(self.oft.Text())<24:
@@ -1004,6 +1055,7 @@ class TrenoWindow(BWindow):
 					self.oft.MarkAsInvalid(True)
 			except:
 				self.oft.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1908:
 			try:
 				if -1<int(self.mft.Text())<60:
@@ -1036,6 +1088,7 @@ class TrenoWindow(BWindow):
 					self.mft.MarkAsInvalid(True)
 			except:
 				self.mft.MarkAsInvalid(True)
+			self.addBtn.SetEnabled(self.checkvalues())
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
