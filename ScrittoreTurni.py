@@ -720,13 +720,13 @@ class TrenoWindow(BWindow):
 		# TODO
 		
 		
-		self.oit = BTextControl(BRect(rect.Width()/3+8,82,rect.Width()/3+48,102),"ora_inizio_treno", "h:",str(5),BMessage(1901))
+		self.oit = BTextControl(BRect(rect.Width()/3+8,82,rect.Width()/3+48,102),"ora_inizio_treno", "h:",str(5),BMessage(1905))
 		self.oit.SetDivider(self.bckgnd.StringWidth("h: "))
-		self.mit = BTextControl(BRect(rect.Width()/3+52,82,rect.Width()/3+98,102),"min_inizio_treno", "m:",str(58),BMessage(1902))
+		self.mit = BTextControl(BRect(rect.Width()/3+52,82,rect.Width()/3+98,102),"min_inizio_treno", "m:",str(58),BMessage(1906))
 		self.mit.SetDivider(self.bckgnd.StringWidth("m: "))
-		self.oft = BTextControl(BRect(rect.Width()/2+8,82,rect.Width()/2+48,102),"ora_fine_treno", "h:",str(6),BMessage(1903))
+		self.oft = BTextControl(BRect(rect.Width()/2+8,82,rect.Width()/2+48,102),"ora_fine_treno", "h:",str(6),BMessage(1907))
 		self.oft.SetDivider(self.bckgnd.StringWidth("h: "))
-		self.mft = BTextControl(BRect(rect.Width()/2+52,82,rect.Width()/2+98,102),"min_fine_treno", "m:",str(38),BMessage(1904))
+		self.mft = BTextControl(BRect(rect.Width()/2+52,82,rect.Width()/2+98,102),"min_fine_treno", "m:",str(38),BMessage(1908))
 		self.mft.SetDivider(self.bckgnd.StringWidth("m: "))
 		self.bckgnd.AddChild(self.oit,None)
 		self.bckgnd.AddChild(self.mit,None)
@@ -754,7 +754,7 @@ class TrenoWindow(BWindow):
 		self.mfmat.SetDivider(80.0)
 		self.bckgnd.AddChild(self.mfmat,None)
 		
-		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-32-a.Size(),rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1002),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-32-a.Size(),rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1112),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
 		self.bckgnd.AddChild(self.addBtn,None)
 	def checkvalues(self):
@@ -783,6 +783,11 @@ class TrenoWindow(BWindow):
 			except:
 				ret=False
 		if ret:
+			try:
+				int(self.name.Text())
+			except:
+				ret=False
+				self.name.MarkAsInvalid(True)
 			if self.cp==None or self.ca==None:
 				ret=False
 			elif self.parte>self.totale:
@@ -902,6 +907,71 @@ class TrenoWindow(BWindow):
 					self.mfa.SetText(str((dtout.seconds % 3600) // 60))
 					self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
 			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1900:
+			try:
+				int(self.name.Text())
+				self.name.MarkAsInvalid(False)
+			except:
+				self.name.MarkAsInvalid(True)
+		elif msg.what == 1905:
+			try:
+				if -1<int(self.oit.Text())<24:
+					self.oit.MarkAsInvalid(False)
+					#check validity of self.mit
+					mitvalid=False
+					try:
+						if -1<int(self.mit.Text())<60:
+							mitvalid=True
+							self.mit.MarkAsInvalid(False)
+					except:
+						self.mit.MarkAsInvalid(True)
+					if (self.mat!=None) and (self.chkaccp.Value()==0) and (self.codaccp!=0) and mitvalid:
+						datoi=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
+						if self.codaccp == 1:
+							#usa accp
+							delt=datetime.timedelta(minutes=self.accp)
+						elif self.codaccp == 3:
+							#cv in partenza
+							delt=datetime.timedelta(minutes=15)
+						elif self.codaccp == 5:
+							#usa prkp
+							delt=datetime.timedelta(minutes=self.prkp)
+						dtout=datoi-delt
+						self.mip.SetText(str((dtout.seconds % 3600) // 60))
+						self.oip.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+				else:
+					self.oit.MarkAsInvalid(True)
+			except:
+				self.oit.MarkAsInvalid(True)
+		elif msg.what == 1906:
+			try:
+				if -1<int(self.mit.Text())<60:
+					self.mit.MarkAsInvalid(False)
+					oitvalid=False
+					try:
+						if -1<int(self.oit.Text())<24:
+							oitvalid=True
+							self.oit.MarkAsInvalid(False)
+					except:
+						self.oit.MarkAsInvalid(True)
+					if (self.mat!=None) and (self.chkaccp.Value()==0) and (self.codaccp!=0) and oitvalid:
+						datoi=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
+						if self.codaccp == 1:
+							#usa accp
+							delt=datetime.timedelta(minutes=self.accp)
+						elif self.codaccp == 3:
+							#cv in partenza
+							delt=datetime.timedelta(minutes=15)
+						elif self.codaccp == 5:
+							#usa prkp
+							delt=datetime.timedelta(minutes=self.prkp)
+						dtout=datoi-delt
+						self.mip.SetText(str((dtout.seconds % 3600) // 60))
+						self.oip.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+				else:
+					self.mit.MarkAsInvalid(True)
+			except:
+				self.mit.MarkAsInvalid(True)
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
