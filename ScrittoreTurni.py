@@ -623,7 +623,7 @@ class TrenoWindow(BWindow):
 	taa=None
 	codacca=0
 	mat=None
-	ccond=None
+	ccond=0
 	ncond=None
 	parte=1
 	totale=1
@@ -752,7 +752,6 @@ class TrenoWindow(BWindow):
 	def checkvalues(self):
 		ret=True
 		if self.chkaccp.Value()==0:
-			print("controllo valori accessori partenza")
 			for testo in {self.oip.Text(),self.mip.Text()}:
 				try:
 					int(testo)
@@ -761,7 +760,6 @@ class TrenoWindow(BWindow):
 			if self.codaccp==0:
 				ret=False
 		if self.chkacca.Value()==0:
-			print("controllo valori accessori arrivo")
 			for testo in {self.ofa.Text(),self.mfa.Text()}:
 				try:
 					int(testo)
@@ -778,24 +776,33 @@ class TrenoWindow(BWindow):
 			try:
 				int(self.name.Text())
 			except:
+				print("nome treno sbagliato")
 				ret=False
 				self.name.MarkAsInvalid(True)
 			if self.cp==None or self.ca==None:
+				print("mancano stazione di partenza e/o di arrivo")
 				ret=False
-			elif self.parte>self.totale:
+			if self.parte>self.totale:
+				print("la parte è superiore al totale")
 				ret=False
 			dtit=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
 			dtft=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
 			if dtit>=dtft:
+				print("l'ora di partenza è successiva all'ora di arrivo")
 				ret=False
 			if self.chkaccp.Value()==0:
 				dtap=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
 				if dtap>dtit:
+					print("l'ora di inizio accessori in partenza è successiva all'ora di partenza")
 					ret=False
 			if self.chkacca.Value()==0:
 				dtaa=datetime.timedelta(hours=int(self.ofa.Text()),minutes=int(self.mfa.Text()))
 				if dtaa<dtft:
+					print("l'ora di fine accessori in arrivo è antecedente all'orario di arrivo")
 					ret=False
+			if self.ccond == 0:
+				print("non è stato selezionato un modulo di condotta")
+				ret=False
 		return ret
 	def MessageReceived(self, msg):
 		if msg.what == 1500:
@@ -829,6 +836,7 @@ class TrenoWindow(BWindow):
 		elif msg.what==808:
 			self.ccond=msg.FindInt8("code")
 			self.ncond=msg.FindString("name")
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 610:
 			self.accp=msg.FindInt8("accp")
 			self.acca=msg.FindInt8("acca")
@@ -1100,7 +1108,7 @@ class TrenoWindow(BWindow):
 				mex.AddInt8("totale",self.totale) #totale del turno
 				mex.AddString("name",self.name.Text()) #nome accessori/numero treno
 				be_app.WindowAt(0).PostMessage(mex)
-			mex=BMessge(1102)
+			mex=BMessage(1102)
 			mex.AddInt32("name",int(self.name.Text()))
 			mex.AddInt8("oi",int(self.oit.Text())) #ora inizio
 			mex.AddInt8("mi",int(self.mit.Text())) #minuto inizio
@@ -1487,7 +1495,144 @@ class MainWindow(BWindow):
 			itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 			titm=self.listaturni.lv.Superitem(itm)
 			self.listaturni.lv.AddUnder(vet,titm)
-			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)#self.listaturni.lv.IndexOf(titm)+cit+2)
+			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)
+		elif msg.what == 1102:
+		#aggiungi treno
+			op=msg.FindInt8("oi")
+			mp=msg.FindInt8("mi")
+			oa=msg.FindInt8("of")
+			ma=msg.FindInt8("mf")
+			csp=msg.FindString("csp")
+			csa=msg.FindString("csa")
+			nsp=msg.FindString("nsp")
+			nsa=msg.FindString("nsa")
+			ncond=msg.FindString("ncond")
+			ccond=msg.FindInt8("ccond")
+			materiale=msg.FindString("materiale")
+			n=msg.FindString("name")
+			parte=msg.FindInt8("parte")
+			totale=msg.FindInt8("totale")
+			dtp = datetime.timedelta(hours=op,minutes=mp)
+			dta = datetime.timedelta(hours=oa,minutes=ma)
+			if self.listaturni.lv.CountItems()>0:
+				trn=TrenoItem(n,dtp,dta,(csp,nsp),(csa,nsa),(ncond,ccond),materiale,(parte,totale))
+				self.tmpElem.append(trn)
+				if self.listaturni.lv.CurrentSelection()>-1:
+					itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
+					titm=self.listaturni.lv.Superitem(itm)
+					if titm != None: 
+					#esiste superitem ovvero sono un elemento del turno
+						print("step 1, selezionato elemento di turno")
+						differ = dtp - itm.fine
+						if self.checkpreviouscompatibility(itm,trn):
+							if differ > datetime.timedelta(minutes=0):
+									print("step 1.2")
+									#prepara BMessage(1001) e crea pausa
+									minutes=(differ.seconds % 3600) // 60
+									hours=differ.days * 24 + differ.seconds // 3600
+									mex=BMessage(1001)
+									mex.AddInt8("deltam",minutes)
+									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
+									mex.AddString("name","Pausa")
+									be_app.WindowAt(0).PostMessage(mex)
+									
+									mx2=BMessage(1012)
+									be_app.WindowAt(0).PostMessage(mx2)
+							elif differ == datetime.timedelta(minutes=0):
+									#aggiungi senza problemi
+									print("step 1.3")
+									self.listaturni.lv.AddUnder(trn,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection())
+						else:
+							ask=BAlert('cle', "Mancata corrispondenza ora partenza treno e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+							self.alertWind.append(ask)
+							ask.Go()				
+					else:
+
+						#Selezionato un superitem
+						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
+						self.listaturni.lv.Expand(itm)
+						print("step 2, selezionato turno")
+						cit=self.listaturni.lv.CountItemsUnder(itm,True)
+						if cit>0:
+							#controlla ultima ora di fine
+							otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).fine
+							differ = dtp - otpf
+							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),trn)
+							if proceed:
+								if differ > datetime.timedelta(minutes=0):
+									print("step 2.2")
+									#prepara BMessage(1001) e crea pausa
+									minutes=(differ.seconds % 3600) // 60
+									hours=differ.days * 24 + differ.seconds // 3600
+									mex=BMessage(1001)
+									mex.AddInt8("deltam",minutes)
+									mex.AddInt8("deltao",hours)
+									mex.AddInt8("parte",parte)
+									mex.AddInt8("totale",totale)
+									mex.AddString("name","Pausa")
+									be_app.WindowAt(0).PostMessage(mex)
+									
+									mx2=BMessage(1013)
+									mx2.AddInt8("cit",cit)
+									be_app.WindowAt(0).PostMessage(mx2)
+								elif differ == datetime.timedelta(minutes=0):
+									#aggiungi senza problemi
+									print("step 2.3")
+									self.listaturni.lv.AddUnder(trn,itm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection()+cit+1)
+							else:
+								ask=BAlert('cle', "Mancata corrispondenza ora partenza treno e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+								self.alertWind.append(ask)
+								ask.Go()
+						else:
+							self.listaturni.lv.AddUnder(trn,itm)
+							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection()+1)
+					self.listaturni.lv.Select(self.listaturni.lv.CurrentSelection())
+				else:
+					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
+					titm=self.listaturni.lv.Superitem(lastit)
+					if titm != None:
+						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
+						#last item is an element, not a superitem
+						cit=self.listaturni.lv.CountItemsUnder(titm,True)
+						#check if otpf è > di acc.inizio
+						proceed=self.checkpreviouscompatibility(lastit,trn)
+						if proceed:
+							differ=trn.inizio-lastit.fine
+							if differ > datetime.timedelta(minutes=0):
+								print("step 3.1")
+								#aggiungi pausa
+								minutes=(differ.seconds % 3600) // 60
+								hours=differ.days * 24 + differ.seconds // 3600
+								mex=BMessage(1001)
+								mex.AddInt8("deltam",minutes)
+								mex.AddInt8("deltao",hours)
+								mex.AddInt8("parte",parte)
+								mex.AddInt8("totale",totale)
+								mex.AddString("name","Pausa")
+								be_app.WindowAt(0).PostMessage(mex)
+									
+								mx2=BMessage(1014)
+								mx2.AddInt8("cit",cit)
+								be_app.WindowAt(0).PostMessage(mx2)
+							elif differ == datetime.timedelta(minutes=0):
+								#agiungi senza prolemi
+								print("step 3.2")
+								self.listaturni.lv.AddUnder(trn,titm)
+								con=self.listaturni.lv.CountItemsUnder(titm,True)
+								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(trn)+con-1)
+						else:
+							ask=BAlert('cle', "Mancata corrispondenza ora partenza treno e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+							self.alertWind.append(ask)
+							ask.Go()
+					else:
+						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
+						self.listaturni.lv.AddUnder(trn,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
+
+
 		elif msg.what == 1002:
 		#aggiungi vettura
 			op=msg.FindInt8("oi")
