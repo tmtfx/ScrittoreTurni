@@ -972,6 +972,70 @@ class TrenoWindow(BWindow):
 					self.mit.MarkAsInvalid(True)
 			except:
 				self.mit.MarkAsInvalid(True)
+		elif msg.what == 1907:
+			try:
+				if -1<int(self.oft.Text())<24:
+					self.oft.MarkAsInvalid(False)
+					mftvalid=False
+					try:
+						if -1<int(self.mft.Text())<60:
+							mftvalid=True
+							self.mft.MarkAsInvalid(False)
+					except:
+						self.mft.MarkAsInvalid(True)
+					if (self.mat!=None) and (self.chkacca.Value()==0) and (self.codacca!=0) and mftvalid:
+						datoi=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
+						if self.codacca == 2:
+							#usa acca
+							delt=datetime.timedelta(minutes=self.acca)
+						elif self.codacca == 4:
+							#cv in arrivo
+							delt=datetime.timedelta(minutes=10)
+						elif self.codacca == 6:
+							#usa prka
+							delt=datetime.timedelta(minutes=self.prka)
+						elif self.codacca == 7:
+							#cambio banco
+							delt=datetime.timedelta(minutes=self.cb)
+						dtout=datoi+delt
+						self.mfa.SetText(str((dtout.seconds % 3600) // 60))
+						self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+				else:
+					self.oft.MarkAsInvalid(True)
+			except:
+				self.oft.MarkAsInvalid(True)
+		elif msg.what == 1908:
+			try:
+				if -1<int(self.mft.Text())<60:
+					self.mft.MarkAsInvalid(False)
+					oftvalid=False
+					try:
+						if -1<int(self.oft.Text())<24:
+							oftvalid=True
+							self.oft.MarkAsInvalid(False)
+					except:
+						self.oft.MarkAsInvalid(True)
+					if (self.mat!=None) and (self.chkacca.Value()==0) and (self.codacca!=0) and oftvalid:
+						datoi=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
+						if self.codacca == 2:
+							#usa acca
+							delt=datetime.timedelta(minutes=self.acca)
+						elif self.codacca == 4:
+							#cv in arrivo
+							delt=datetime.timedelta(minutes=10)
+						elif self.codacca == 6:
+							#usa prka
+							delt=datetime.timedelta(minutes=self.prka)
+						elif self.codacca == 7:
+							#cambio banco
+							delt=datetime.timedelta(minutes=self.cb)
+						dtout=datoi+delt
+						self.mfa.SetText(str((dtout.seconds % 3600) // 60))
+						self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+				else:
+					self.mft.MarkAsInvalid(True)
+			except:
+				self.mft.MarkAsInvalid(True)
 		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
