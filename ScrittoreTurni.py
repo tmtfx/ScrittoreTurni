@@ -76,9 +76,10 @@ class Materiale(BMenuItem):
 		msg.AddInt8("acca",data[2])
 		msg.AddInt8("prkp",data[3])
 		msg.AddInt8("prka",data[4])
+		msg.AddInt8("cb",data[5])
 		msg.AddString("name",self.name)
 		BMenuItem.__init__(self,self.name,msg,self.name[0],0)
-materiali=[Materiale(("Rock",30,15,25,10)),Materiale(("563/564",30,15,25,10)),Materiale(("Ale/Aln 501/502",25,10,20,10)),Materiale(("Blues",25,10,20,10)),Materiale(("464/MD/Viv",40,20,25,10)),Materiale(("464+464/MD",55,30,25,10))] #TODO aggiungere accessori predefiniti
+materiali=[Materiale(("Rock",30,15,25,10,7)),Materiale(("563/564",30,15,25,10,7)),Materiale(("Ale/Aln 501/502",25,10,20,10,6)),Materiale(("Blues",25,10,20,10,7)),Materiale(("464/MD/Viv",40,20,25,10,10)),Materiale(("464+464/MD",55,30,25,10,10))]
 class TipoAcc(BMenuItem):
 	def __init__(self,cubie):
 		self.name=cubie[0]
@@ -448,6 +449,11 @@ class AccWindow(BWindow):
 					ret=False
 			elif self.parte>self.totale:
 				ret=False
+			#TODO	elif int(self.oi.Text())>23:
+			#			ret=False
+			#		elif int(self.mi.Text())>59:
+			#			ret=False
+			# ecc.
 		return ret
 	def MessageReceived(self, msg):
 		if msg.what==605:
@@ -467,7 +473,6 @@ class AccWindow(BWindow):
 		elif msg.what==607:
 			#stabilisto tipo accessori
 			self.codacc = msg.FindInt8("code")
-			print(self.codacc)
 			self.ta = msg.FindString("name")
 			if self.mat!=None:
 				datoi=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
@@ -491,7 +496,7 @@ class AccWindow(BWindow):
 					delt=datetime.timedelta(minutes=self.prka)
 				elif self.codacc == 7:
 					#cambio banco
-					delt=datetime.timedelta(minutes=1)
+					delt=datetime.timedelta(minutes=self.cb)
 				elif self.codacc == 8:
 					#tempi medi di manovra
 					delt=datetime.timedelta(minutes=10)
@@ -514,6 +519,7 @@ class AccWindow(BWindow):
 			self.acca=msg.FindInt8("acca")
 			self.prkp=msg.FindInt8("prkp")
 			self.prka=msg.FindInt8("prka")
+			self.cb=msg.FindInt8("cb")
 			self.mat=msg.FindString("name")
 			if self.codacc!=0:
 				datoi=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
@@ -617,13 +623,15 @@ class TrenoWindow(BWindow):
 	taa=None
 	codacca=0
 	mat=None
+	ccond=None
+	ncond=None
 	parte=1
 	totale=1
 	tipoaccp=[("Accessori in partenza",1),("Cambio volante in partenza",3),("Parking in partenza",5)]
 	tipoacca=[("Accessori in arrivo",2),("Cambio volante in arrivo",4),("Parking in arrivo",6),("Cambio banco",7)]
 	tipocond=[("Agente solo",1),("Agente Unico",2),("Doppio Agente/1",3),("Doppio Agente/2",4)]
 	def __init__(self):
-		BWindow.__init__(self, BRect(300,150,1000,400), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(300,150,1000,365), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
 		self.AddChild(self.bckgnd,None)
 		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
@@ -681,22 +689,11 @@ class TrenoWindow(BWindow):
 		self.oip = BTextControl(BRect(12,28+a.Size(),132,32+2*a.Size()),"ora_inizio_p", "Inizio ore:",str(5),BMessage(1901))
 		self.oip.SetDivider(90.0)
 		self.mip = BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio_p", "min:",str(58),BMessage(1902))
-		self.ofp = BTextControl(BRect(12,56+a.Size(),132,60+2*a.Size()),"ora_fine_p", "Fine ore:",str(6),BMessage(1903))
-		self.ofp.SetDivider(75.0)
-		self.mfp = BTextControl(BRect(136,56+a.Size(),192,60+2*a.Size()),"min_fine_p", "min:",str(38),BMessage(1904))
 		self.boxaccp.AddChild(self.oip,None)
 		self.boxaccp.AddChild(self.mip,None)
-		self.boxaccp.AddChild(self.ofp,None)
-		self.boxaccp.AddChild(self.mfp,None)
-		
-		self.oia = BTextControl(BRect(12,28+a.Size(),132,32+2*a.Size()),"ora_inizio_a", "Inizio ore:",str(5),BMessage(1901))
-		self.oia.SetDivider(90.0)
-		self.mia = BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_inizio_a", "min:",str(58),BMessage(1902))
-		self.ofa = BTextControl(BRect(12,56+a.Size(),132,60+2*a.Size()),"ora_fine_a", "Fine ore:",str(6),BMessage(1903))
+		self.ofa = BTextControl(BRect(12,28+a.Size(),132,32+2*a.Size()),"ora_fine_a", "Fine ore:",str(6),BMessage(1903))
 		self.ofa.SetDivider(75.0)
-		self.mfa = BTextControl(BRect(136,56+a.Size(),192,60+2*a.Size()),"min_fine_a", "min:",str(38),BMessage(1904))
-		self.boxacca.AddChild(self.oia,None)
-		self.boxacca.AddChild(self.mia,None)
+		self.mfa = BTextControl(BRect(136,28+a.Size(),192,32+2*a.Size()),"min_fine_a", "min:",str(38),BMessage(1904))
 		self.boxacca.AddChild(self.ofa,None)
 		self.boxacca.AddChild(self.mfa,None)
 		
@@ -760,17 +757,152 @@ class TrenoWindow(BWindow):
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-32-a.Size(),rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1002),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
 		self.bckgnd.AddChild(self.addBtn,None)
+	def checkvalues(self):
+		ret=True
+		if self.chkaccp.Value()==0:
+			print("controllo valori accessori partenza")
+			for testo in {self.oip.Text(),self.mip.Text()}:
+				try:
+					int(testo)
+				except:
+					ret=False
+			if self.codaccp==0:
+				ret=False
+		if self.chkacca.Value()==0:
+			print("controllo valori accessori arrivo")
+			for testo in {self.ofa.Text(),self.mfa.Text()}:
+				try:
+					int(testo)
+				except:
+					ret=False
+			if self.codacca==0:
+				ret=False
+		for testo in {self.oit.Text(),self.mit.Text(),self.oft.Text(),self.mft.Text()}:
+			try:
+				int(testo)
+			except:
+				ret=False
+		if ret:
+			if self.cp==None or self.ca==None:
+				ret=False
+			elif self.parte>self.totale:
+				ret=False
+		return ret
 	def MessageReceived(self, msg):
 		if msg.what == 1500:
 			if self.chkaccp.Value()==0:
 				self.boxaccp.Show()
 			else:
 				self.boxaccp.Hide()
+			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1501:
 			if self.chkacca.Value()==0:
 				self.boxacca.Show()
 			else:
 				self.boxacca.Hide()
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what==605:
+			#stabilisco stazione partenza
+			self.cp = msg.FindString("code")
+			self.np = msg.FindString("name")
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what==606:
+			#stabilisco stazione arrivo
+			self.ca = msg.FindString("code")
+			self.na = msg.FindString("name")
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 608:
+			self.parte = msg.FindInt8("code")
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 609:
+			self.totale = msg.FindInt8("code")
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what==808:
+			self.ccond=msg.FindInt8("code")
+			self.ncond=msg.FindString("name")
+		elif msg.what == 610:
+			self.accp=msg.FindInt8("accp")
+			self.acca=msg.FindInt8("acca")
+			self.prkp=msg.FindInt8("prkp")
+			self.prka=msg.FindInt8("prka")
+			self.cb=msg.FindInt8("cb2")
+			self.mat=msg.FindString("name")
+			if self.chkaccp.Value()==0:
+				if self.codaccp!=0:
+					datoi=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
+					if self.codaccp == 1:
+						#usa accp
+						delt=datetime.timedelta(minutes=self.accp)
+					elif self.codaccp == 3:
+						#cv in partenza
+						delt=datetime.timedelta(minutes=15)
+					elif self.codaccp == 5:
+						#usa prkp
+						delt=datetime.timedelta(minutes=self.prkp)
+					dtout=datoi-delt
+					self.mip.SetText(str((dtout.seconds % 3600) // 60))
+					self.oip.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			if self.chkacca.Value()==0:
+				if self.codacca!=0:
+					datoi=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
+					if self.codacca == 2:
+						#usa acca
+						delt=datetime.timedelta(minutes=self.acca)
+					elif self.codacca == 4:
+						#cv in arrivo
+						delt=datetime.timedelta(minutes=10)
+					elif self.codacca == 6:
+						#usa prka
+						delt=datetime.timedelta(minutes=self.prka)
+					elif self.codacca == 7:
+						#cambio banco
+						delt=datetime.timedelta(minutes=self.cb)
+					dtout=datoi+delt
+					self.mfa.SetText(str((dtout.seconds % 3600) // 60))
+					self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 707:
+			self.codaccp = msg.FindInt8("code")
+			self.tap = msg.FindString("name")
+			if self.mat!=None:
+				datoi=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
+				if self.codaccp != 0:
+					if self.codaccp == 1:
+						#usa accp
+						delt=datetime.timedelta(minutes=self.accp)
+					elif self.codaccp == 3:
+						#cv in partenza
+						delt=datetime.timedelta(minutes=15)
+					elif self.codaccp == 5:
+						#usa prkp
+						delt=datetime.timedelta(minutes=self.prkp)
+					dtout=datoi-delt
+					self.mip.SetText(str((dtout.seconds % 3600) // 60))
+					self.oip.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 708:
+			self.codacca = msg.FindInt8("code")
+			self.taa = msg.FindString("name")
+			if self.mat!=None:
+				datoi=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
+				if self.codacca != 0:
+					if self.codacca == 2:
+						#usa acca
+						delt=datetime.timedelta(minutes=self.acca)
+					elif self.codacca == 4:
+						#cv in arrivo
+						delt=datetime.timedelta(minutes=10)
+					elif self.codacca == 6:
+						#usa prka
+						delt=datetime.timedelta(minutes=self.prka)
+					elif self.codacca == 7:
+						#cambio banco
+						delt=datetime.timedelta(minutes=self.cb)
+					dtout=datoi+delt
+					self.mfa.SetText(str((dtout.seconds % 3600) // 60))
+					self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
+		return BWindow.MessageReceived(self,msg)
 	def QuitRequested(self):
 		self.Hide()
 class PausaWindow(BWindow):
@@ -910,8 +1042,7 @@ class MainWindow(BWindow):
 			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
 		#self.deselectBtn=PButton(BRect(305, 4+barheight, 445,a.Size()),'DeselectBtn','▤',BMessage(1802),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)#▤⌧
 		self.box.AddChild(self.deselectBtn, None)
-		
-		
+
 	def FrameResized(self,x,y):
 		resiz=False
 		if x<974:
