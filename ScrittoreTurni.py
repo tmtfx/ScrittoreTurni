@@ -17,7 +17,8 @@ from Be.ListView import list_view_type
 from Be.AppDefs import *
 from Be.Font import be_plain_font, be_bold_font
 from Be import AppDefs
-from Be.TextView import text_run, text_run_array
+# from Be.TextView import text_run, text_run_array
+from Be.FilePanel import *
 # from Be.fs_attr import attr_info
 from Be.Application import *
 from Be.Font import font_height
@@ -966,7 +967,6 @@ class TrenoWindow(BWindow):
 							self.oit.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
 							self.mip.SetText(mins)
 							self.oip.SetText(hrs)
-							
 						else:
 							self.mip.SetText(mins)
 							self.oip.SetText(hrs)
@@ -1346,6 +1346,9 @@ class MainWindow(BWindow):
 			lab="▤"#▤⌧
 			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
 		self.box.AddChild(self.deselectBtn, None)
+		self.fp=BFilePanel(B_SAVE_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
+		self.fp.SetPanelDirectory("/boot/home/Desktop")
+		self.fp.SetSaveText("Turni.trn")
 
 	def FrameResized(self,x,y):
 		resiz=False
@@ -1476,6 +1479,7 @@ class MainWindow(BWindow):
 				else:
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 		elif msg.what == 3:
+		#rimuovi turni
 			if self.listaturni.lv.CountItems()>0:
 				ask=BAlert('rem', "Questa operazione non è reversibile: rimuovere tutti i turni?", 'Sì', 'No',None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 				self.alertWind.append(ask)
@@ -1483,6 +1487,43 @@ class MainWindow(BWindow):
 				if not ret:
 					for g in self.listaturni.lv.Items():
 						self.listaturni.lv.RemoveItem(g)
+		elif msg.what == 2:
+		#pannello salvafile turni
+			
+			self.fp.Show()
+#			#with open("test.txt", "a") as myfile:
+#			#myfile.write("appended text")
+#			i=0
+#			while i < self.listaturni.lv.CountItems():
+#				ita=self.listaturni.lv.ItemAt(i)
+#				if type(ita)==BStringItem:
+#				elif type(ita)==PausItem:
+#				elif type(ita)==AccItem:
+#				elif type(ita)==TrenoItem:
+#				elif type(ita)==VettItem:
+#				i+=1
+		elif msg.what == 54173:
+			#Save turni
+			b=entry_ref()
+			self.fp.GetPanelDirectory(b)
+			c=BEntry(b)
+			d=BPath()
+			c.GetPath(d)
+			savepath=d.Path()
+			e = msg.FindString("name")
+			completepath = savepath +"/"+ e
+			print(completepath)
+			 with open(completepath, "a") as myfile:
+				 i=0
+				 while i < self.listaturni.lv.CountItems():
+					ita=self.listaturni.lv.ItemAt(i)
+					if type(ita)==BStringItem:
+					elif type(ita)==PausItem:
+					elif type(ita)==AccItem:
+					elif type(ita)==TrenoItem:
+					elif type(ita)==VettItem:
+					i+=1
+			#return
 		elif msg.what == 1001:
 			print("1001 inserimento pausa")
 		#aggiungi pausa
@@ -2334,7 +2375,12 @@ class App(BApplication):
 		self.window = MainWindow()
 		self.window.Show()
 	def MessageReceived(self,msg):
-		msg.PrintToStream()
+		if msg.what == B_SAVE_REQUESTED:
+			e = msg.FindString("name")
+			messaggio = BMessage(54173)
+			messaggio.AddString("name",e)
+			be_app.WindowAt(0).PostMessage(messaggio)
+			return
 		BApplication.MessageReceived(self,msg)
 
 #	def Pulse(self):
