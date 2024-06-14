@@ -1305,7 +1305,7 @@ class MainWindow(BWindow):
 	tmpElem=[]
 	alertWind=[]
 	Menus = (
-		('File', ((1, 'Carica turno'),(2, 'Salva turno'),(3, 'Chiudi turno'),(None, None),(int(AppDefs.B_QUIT_REQUESTED), 'Esci'))),('Aggiungi', ((4, 'Accessori'),(5, 'Vettura'),(6, 'Treno'),(7, 'Pausa'))),('Elaborazione', ((10, 'Estrai treni'),(11, 'Componi treni-acc'),(42, 'Crea giornate'))),
+		('File', ((1, 'Carica turno'),(2, 'Salva turno'),(3, 'Distruggi turni'),(None, None),(int(AppDefs.B_QUIT_REQUESTED), 'Esci'))),('Aggiungi', ((4, 'Accessori'),(5, 'Vettura'),(6, 'Treno'),(7, 'Pausa'))),('Elaborazione', ((10, 'Estrai treni'),(11, 'Componi treni-acc'),(42, 'Crea giornate'))),
 		('Aiuto', ((8, 'Judimi'),(23, 'Informazioni')))
 		)
 	def __init__(self):
@@ -1480,6 +1480,14 @@ class MainWindow(BWindow):
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()))
 				else:
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
+		elif msg.what == 3:
+			if self.listaturni.lv.CountItems()>0:
+				ask=BAlert('rem', "Questa operazione non è reversibile: rimuovere tutti i turni?", 'Sì', 'No',None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+				self.alertWind.append(ask)
+				ret=ask.Go()
+				if not ret:
+					for g in self.listaturni.lv.Items():
+						self.listaturni.lv.RemoveItem(g)
 		elif msg.what == 1001:
 			print("1001 inserimento pausa")
 		#aggiungi pausa
