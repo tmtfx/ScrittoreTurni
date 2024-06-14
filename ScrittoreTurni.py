@@ -1655,33 +1655,8 @@ class MainWindow(BWindow):
 									dm=(differ.seconds % 3600) // 60
 									do=differ.days * 24 + differ.seconds // 3600
 									dt = datetime.timedelta(hours=do,minutes=dm)
-									#if self.listaturni.lv.CountItems()>0:
-										#if self.listaturni.lv.CurrentSelection()>-1:
-											#selit=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 									if True: # inserito per non adattare indenting
 												selit = itm
-#questo non serve il nostro elemento selezionato è un elemento di turno
-#											if type(selit)==BStringItem:
-#												#selezionato FV ####
-#												it=self.listaturni.lv.CountItemsUnder(selit,True)
-#												if it>0:
-#													self.listaturni.lv.Expand(selit)
-#													lastund=self.listaturni.lv.ItemUnderAt(selit,True,it-1)
-#													i=lastund.fine #(or it-1)
-#													sta=lastund.sta
-#													pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#													self.tmpElem.append(pau)
-#													self.listaturni.lv.AddUnder(pau,selit)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
-#													self.listaturni.lv.AddUnder(accp,selit)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.IndexOf(pau))
-#													self.listaturni.lv.AddUnder(trn,selit)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(accp))
-#													if aa:
-#														self.listaturni.lv.AddUnder(acca,selit)
-#														self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
-#											else:
-												#selezionato elemento turno
 												i=selit.fine
 												sta=selit.sta
 												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
@@ -1696,84 +1671,13 @@ class MainWindow(BWindow):
 												if aa:
 													self.listaturni.lv.AddUnder(acca,supit)
 													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
-#questi non servono sto valutando caso specifico di elemento selezionato												
-#										else:
-#											#niente di selezionato
-#											litm=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
-#											if type(litm) == BStringItem:
-#												#ultimo elemento è FV ####
-#												it=self.listaturni.lv.CountItemsUnder(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1),True)
-#												self.listaturni.lv.Expand(litm)
-#												if it>0:
-#													i=self.listaturni.lv.ItemUnderAt(litm,True,it-1).fine
-#													sta=self.listaturni.lv.ItemUnderAt(litm,True,it-1).sta
-#													pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#													self.tmpElem.append(pau)
-#													self.listaturni.lv.AddUnder(pau,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
-#													self.listaturni.lv.AddUnder(accp,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.CountItems()-1)
-#													self.listaturni.lv.AddUnder(trn,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
-#													if aa:
-#														self.listaturni.lv.AddUnder(acca,litm)
-#														self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)
-#												else:
-#													print("non posso aggiungere perché il turno è vuoto")
-#											else:
-#												#ultimo è elemento turno
-#												i=litm.fine
-#												sta=litm.sta
-#												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#												self.tmpElem.append(pau)
-#												titm=self.listaturni.lv.Superitem(litm)
-#												self.listaturni.lv.AddUnder(pau,titm)
-#												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
-#												self.listaturni.lv.AddUnder(accp,litm)
-#												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.CountItems()-1)
-#												self.listaturni.lv.AddUnder(trn,litm)
-#												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
-#												if aa:
-#													self.listaturni.lv.AddUnder(acca,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)
-									
-									# NOTA: ma questo qua sotto perché va fatto?
-									#vet=self.tmpElem[-2]
-									#itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
-									#titm=self.listaturni.lv.Superitem(itm)
-									#self.listaturni.lv.AddUnder(vet,titm)
-									#self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection())
-									
 								else:
 									#aggiungi treno
 									dm=(differ.seconds % 3600) // 60
 									do=differ.days * 24 + differ.seconds // 3600
 									dt = datetime.timedelta(hours=do,minutes=dm)
-#									if self.listaturni.lv.CountItems()>0:
-#										if self.listaturni.lv.CurrentSelection()>-1:
-#											selit=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 									if True: # inserito per non adattare indenting
 												selit = itm
-#questo non serve il nostro elemento selezionato è un elemento di turno
-#											if type(selit)==BStringItem:
-#												#selezionato FV ####
-#												it=self.listaturni.lv.CountItemsUnder(selit,True)
-#												if it>0:
-#													self.listaturni.lv.Expand(selit)
-#													lastund=self.listaturni.lv.ItemUnderAt(selit,True,it-1)
-#													i=lastund.fine #(or it-1)
-#													sta=lastund.sta
-#													pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#													self.tmpElem.append(pau)
-#													self.listaturni.lv.AddUnder(pau,selit)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
-#													self.listaturni.lv.AddUnder(trn,selit)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(pau))
-#													if aa:
-#														self.listaturni.lv.AddUnder(acca,selit)
-#														self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
-#											else:
-												#selezionato elemento turno
 												i=selit.fine
 												sta=selit.sta
 												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
@@ -1786,42 +1690,6 @@ class MainWindow(BWindow):
 												if aa:
 													self.listaturni.lv.AddUnder(acca,supit)
 													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
-#questo non serve sto valutando caso di elemento selezionato												
-#										else:
-#											#niente di selezionato
-#											litm=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
-#											if type(litm) == BStringItem:
-#												#ultimo elemento è FV ####
-#												it=self.listaturni.lv.CountItemsUnder(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1),True)
-#												self.listaturni.lv.Expand(litm)
-#												if it>0:
-#													i=self.listaturni.lv.ItemUnderAt(litm,True,it-1).fine
-#													sta=self.listaturni.lv.ItemUnderAt(litm,True,it-1).sta
-#													pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#													self.tmpElem.append(pau)
-#													self.listaturni.lv.AddUnder(pau,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
-#													self.listaturni.lv.AddUnder(trn,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
-#													if aa:
-#														self.listaturni.lv.AddUnder(acca,litm)
-#														self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)
-#												else:
-#													print("non posso aggiungere perché il turno è vuoto")
-#											else:
-#												#ultimo è elemento turno
-#												i=litm.fine
-#												sta=litm.sta
-#												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-#												self.tmpElem.append(pau)
-#												titm=self.listaturni.lv.Superitem(litm)
-#												self.listaturni.lv.AddUnder(pau,titm)
-#												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
-#												self.listaturni.lv.AddUnder(trn,litm)
-#												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
-#												if aa:
-#													self.listaturni.lv.AddUnder(acca,litm)
-#													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)
 							elif differ == datetime.timedelta(minutes=0):
 								print("step 1.3")
 								if ap:
@@ -1844,7 +1712,6 @@ class MainWindow(BWindow):
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 									#se aa aggiungi accessori in arrivo
 					else:
-######################## arrivato qui ##################################
 						#Selezionato un superitem
 						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
 						self.listaturni.lv.Expand(itm)
@@ -1858,6 +1725,9 @@ class MainWindow(BWindow):
 								differ = dtpp - otpf
 							else:
 								differ = dtp - otpf
+							dm=(differ.seconds % 3600) // 60
+							do=differ.days * 24 + differ.seconds // 3600
+							dt = datetime.timedelta(hours=do,minutes=dm)
 							if differ < datetime.timedelta(minutes=0):
 								ask=BAlert('cle', "Ora accessori/partenza treno anteriore a fine dell'ultiam riga del turno", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 								self.alertWind.append(ask)
@@ -1866,20 +1736,15 @@ class MainWindow(BWindow):
 							else:
 								if differ > datetime.timedelta(minutes=0):
 									selit=itm
+									lastund=self.listaturni.lv.ItemUnderAt(selit,True,cit-1)
+									i=lastund.fine #(or it-1)
+									sta=lastund.sta
+									pau=PausItem("Pausa",i,dt,sta,(parte,totale))
+									self.tmpElem.append(pau)
+									self.listaturni.lv.AddUnder(pau,selit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
 									if ap:
 										print("step 2.2, aggiungi pausa, accessori partenza, treno e accessori arrivo")
-										dm=(differ.seconds % 3600) // 60
-										do=differ.days * 24 + differ.seconds // 3600
-										dt = datetime.timedelta(hours=do,minutes=dm)
-										
-										lastund=self.listaturni.lv.ItemUnderAt(selit,True,cit-1)
-										i=lastund.fine #(or it-1)
-										sta=lastund.sta
-										pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-										self.tmpElem.append(pau)
-										print("Aggiungo pausa")
-										self.listaturni.lv.AddUnder(pau,selit)
-										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
 										self.listaturni.lv.AddUnder(accp,selit)
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.IndexOf(pau))
 										self.listaturni.lv.AddUnder(trn,selit)
@@ -1889,30 +1754,11 @@ class MainWindow(BWindow):
 											self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 									else:
 										print("step 2.2, aggiungi pausa, treno e accessori arrivo")
-										dm=(differ.seconds % 3600) // 60
-										do=differ.days * 24 + differ.seconds // 3600
-										dt = datetime.timedelta(hours=do,minutes=dm)
-										
-										lastund=self.listaturni.lv.ItemUnderAt(selit,True,cit-1)
-										i=lastund.fine #(or it-1)
-										sta=lastund.sta
-										pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-										self.tmpElem.append(pau)
-										print("Aggiungo pausa")
-										self.listaturni.lv.AddUnder(pau,selit)
-										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
 										self.listaturni.lv.AddUnder(trn,selit)
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(pau))
 										if aa:
 											self.listaturni.lv.AddUnder(acca,selit)
 											self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
-#									mex=BMessage(1001)
-#									mex.AddInt8("deltam",minutes)
-#									mex.AddInt8("deltao",hours)
-#									mex.AddInt8("parte",parte)
-#									mex.AddInt8("totale",totale)
-#									mex.AddString("name","Pausa")
-#									be_app.WindowAt(0).PostMessage(mex)
 
 								elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
@@ -1920,51 +1766,68 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddUnder(trn,itm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection()+cit+1)
 						else:
+						#il superitem è vuoto
 							self.listaturni.lv.AddUnder(trn,itm)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection()+1)
 					self.listaturni.lv.Select(self.listaturni.lv.CurrentSelection())
+
 				else:
 					#niente selezionato
 					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 					titm=self.listaturni.lv.Superitem(lastit)
 					if titm != None:
 						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
-						#last item is an element, not a superitem
 						cit=self.listaturni.lv.CountItemsUnder(titm,True)
-						#check if otpf è > di acc.inizio
-						proceed=self.checkpreviouscompatibility(lastit,trn) # <--- BUG questo va controllato solo se non ci sono accessori in partenza
-						#occorre controllare che inizio accessori partenza non sia precedente a fine elemento precedente e questo devo farlo dalla finestra di Treno
-						if proceed:
-							differ=trn.inizio-lastit.fine
-							if differ > datetime.timedelta(minutes=0):
-								print("step 3.1")
-								#aggiungi pausa
-								minutes=(differ.seconds % 3600) // 60
-								hours=differ.days * 24 + differ.seconds // 3600
-								mex=BMessage(1001)
-								mex.AddInt8("deltam",minutes)
-								mex.AddInt8("deltao",hours)
-								mex.AddInt8("parte",parte)
-								mex.AddInt8("totale",totale)
-								mex.AddString("name","Pausa")
-								be_app.WindowAt(0).PostMessage(mex)
-									
-								mx2=BMessage(1014)
-								mx2.AddInt8("cit",cit)
-								be_app.WindowAt(0).PostMessage(mx2)
-							elif differ == datetime.timedelta(minutes=0):
-								#agiungi senza prolemi
-								print("step 3.2")
-								self.listaturni.lv.AddUnder(trn,titm)
-								con=self.listaturni.lv.CountItemsUnder(titm,True)
-								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(trn)+con-1)
+						i= lastit.fine
+						sta=lastit.sta
+						#last item is an element, not a superitem
+						if ap:
+							differ = dtpp - i
 						else:
-							ask=BAlert('cle', "Mancata corrispondenza ora partenza treno e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
-							self.alertWind.append(ask)
-							ask.Go()
+							differ = dtp - i
+						dm=(differ.seconds % 3600) // 60
+						do=differ.days * 24 + differ.seconds // 3600
+						dt = datetime.timedelta(hours=do,minutes=dm)
+						if differ < datetime.timedelta(minutes=0):
+								ask=BAlert('cle', "Ora accessori/partenza treno anteriore a fine della ultimo rigo", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+								self.alertWind.append(ask)
+								ask.Go()
+								return
+						else:
+							if differ > datetime.timedelta(minutes=0):
+								pau=PausItem("Pausa",i,dt,sta,(parte,totale))
+								self.tmpElem.append(pau)
+								self.listaturni.lv.AddUnder(pau,titm)
+								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
+								if ap:
+									self.listaturni.lv.AddUnder(accp,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.CountItems()-1)
+								self.listaturni.lv.AddUnder(trn,titm)
+								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
+								if aa:
+									self.listaturni.lv.AddUnder(acca,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)
+							elif differ == datetime.timedelta(minutes=0):
+								if ap:
+									self.listaturni.lv.AddUnder(accp,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.CountItems()-1)
+								self.listaturni.lv.AddUnder(trn,titm)
+								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)
+								if aa:
+									self.listaturni.lv.AddUnder(acca,titm)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)	
 					else:
-						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
-						self.listaturni.lv.AddUnder(trn,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
+						print("step 4, niente selezionato, ultimo oggetto è turno FV") # verificare che succede se questo e precedente sono collassati e non selezionati
+						fvt=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
+						if ap:
+							self.listaturni.lv.AddUnder(accp,fvt)
+							self.listaturni.lv.AddUnder(trn,fvt)
+							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CountItems()-1)	
+						else:
+							self.listaturni.lv.AddUnder(trn,fvt)
+						if aa:
+							self.listaturni.lv.AddUnder(acca,fvt)
+							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)	
 		elif msg.what == 1002:
 			print("1002 inserimento vettura")
 		#aggiungi vettura
