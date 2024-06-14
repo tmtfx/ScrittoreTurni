@@ -72,6 +72,7 @@ class Materiale(BMenuItem):
 		self.acca=data[2]
 		self.prkp=data[3]
 		self.prka=data[4]
+		self.cb=data[5]
 		msg=BMessage(610)
 		msg.AddInt8("accp",data[1])
 		msg.AddInt8("acca",data[2])
@@ -643,7 +644,6 @@ class TrenoWindow(BWindow):
 		self.bckgnd.AddChild(self.boxaccp,None)
 		baprect=self.boxaccp.Bounds()
 		self.chkaccp = BCheckBox(BRect(8,8,rect.Width()/3-8,28),"CheckBox_acc_partenza","Accessori partenza",BMessage(1500))
-		#self.chkaccp.SetValue(True)
 		self.bckgnd.AddChild(self.chkaccp,None)
 		
 		self.menuaccp=BMenu("Tipo accessori")
@@ -651,7 +651,7 @@ class TrenoWindow(BWindow):
 		for y in self.tipoaccp:
 			self.menuaccp.AddItem(TipoAccp(y))
 		self.menufp = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuaccp,B_FOLLOW_TOP)
-		self.menufp.SetDivider(0) #<-This works
+		self.menufp.SetDivider(0)
 		self.boxaccp.AddChild(self.menufp,None)
 		
 		self.name=BTextControl(BRect(rect.Width()/3+8,8,rect.Width()*2/3-8,12+a.Size()),"ntreno", "Numero treno:","1234",BMessage(1900))
@@ -661,14 +661,13 @@ class TrenoWindow(BWindow):
 		self.bckgnd.AddChild(self.boxacca,None)
 		baarect=self.boxacca.Bounds()
 		self.chkacca = BCheckBox(BRect(rect.Width()*2/3+8,8,rect.Width()-8,28),"CheckBox_acc_arrivo","Accessori arrivo",BMessage(1501))
-		#self.chkacca.SetValue(True)
 		self.bckgnd.AddChild(self.chkacca,None)
 		self.menuacca=BMenu("Tipo accessori")
 		self.menuacca.SetLabelFromMarked(True)
 		for y in self.tipoacca:
 			self.menuacca.AddItem(TipoAcca(y))
 		self.menufa = BMenuField(BRect(8,8,158,12+a.Size()), 'pop0', '', self.menuacca,B_FOLLOW_TOP)
-		self.menufa.SetDivider(0) #<-This works
+		self.menufa.SetDivider(0)
 		self.boxacca.AddChild(self.menufa,None)
 		
 		self.menupt=BMenu("1")
@@ -746,6 +745,17 @@ class TrenoWindow(BWindow):
 		self.addBtn=BButton(BRect(rect.Width()/2, rect.Height()-32-a.Size(),rect.Width()-8,rect.Height()-8),'AddBtn','Aggiungi',BMessage(1112),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.addBtn.SetEnabled(False)
 		self.bckgnd.AddChild(self.addBtn,None)
+		perc=BPath()
+		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/orloi2.jpg")
+		lab='🕒'
+		if ent.Exists():
+			ent.GetPath(perc)
+			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+			self.getTimeBtn=PButton(BRect(rect.Width()/2-48,rect.Height()-32-a.Size(), rect.Width()/2-8,rect.Height()-8),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT,img1)
+		else:
+			self.getTimeBtn=BButton(BRect(rect.Width()/2-48,rect.Height()-32-a.Size(),rect.Width()/2-8,rect.Height()-8),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+		self.bckgnd.AddChild(self.getTimeBtn,None)
 	def checkvalues(self):
 		ret=True
 		if self.chkaccp.Value()==0:
@@ -814,12 +824,12 @@ class TrenoWindow(BWindow):
 			else:
 				self.boxacca.Hide()
 			self.addBtn.SetEnabled(self.checkvalues())
-		elif msg.what==605:
+		elif msg.what == 605:
 			#stabilisco stazione partenza
 			self.cp = msg.FindString("code")
 			self.np = msg.FindString("name")
 			self.addBtn.SetEnabled(self.checkvalues())
-		elif msg.what==606:
+		elif msg.what == 606:
 			#stabilisco stazione arrivo
 			self.ca = msg.FindString("code")
 			self.na = msg.FindString("name")
@@ -830,7 +840,7 @@ class TrenoWindow(BWindow):
 		elif msg.what == 609:
 			self.totale = msg.FindInt8("code")
 			self.addBtn.SetEnabled(self.checkvalues())
-		elif msg.what==808:
+		elif msg.what == 808:
 			self.ccond=msg.FindInt8("code")
 			self.ncond=msg.FindString("name")
 			self.addBtn.SetEnabled(self.checkvalues())
@@ -915,6 +925,56 @@ class TrenoWindow(BWindow):
 					dtout=datoi+delt
 					self.mfa.SetText(str((dtout.seconds % 3600) // 60))
 					self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 1020:
+			#recupera orario e stazione precedente
+			lt=be_app.WindowAt(0).listaturni.lv
+			if lt.CountItems()>1:
+				doit=False
+				if lt.CurrentSelection()>-1:
+					selitm=lt.ItemAt(lt.CurrentSelection())
+					if type(selitm) != BStringItem:
+						orario=selitm.fine
+						sta=selitm.sta
+						doit=True
+				else:
+					lastitm=lt.ItemAt(lt.CountItems()-1)
+					if type(lastitm) != BStringItem:
+						orario=lastitm.fine
+						sta=lastitm.sta
+						doit=True
+				if doit:
+					mins=str((orario.seconds % 3600) // 60)
+					hrs=str(orario.days * 24 + orario.seconds // 3600)
+					datp=datetime.timedelta(hours=int(hrs),minutes=int(mins))
+					self.menup.FindItem(sta[1]).SetMarked(True)
+					self.cp=sta[0]
+					self.np=sta[1]
+					if self.chkaccp.Value()==0:
+						if self.codaccp!=0 and self.mat!=None:
+							if self.codaccp == 1:
+								#usa accp
+								delt=datetime.timedelta(minutes=self.accp)
+							elif self.codaccp == 3:
+								#cv in partenza
+								delt=datetime.timedelta(minutes=15)
+							elif self.codaccp == 5:
+								#usa prkp
+								delt=datetime.timedelta(minutes=self.prkp)
+							dtout=datp+delt
+							self.mit.SetText(str((dtout.seconds % 3600) // 60))
+							self.oit.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
+							self.mip.SetText(mins)
+							self.oip.SetText(hrs)
+							
+						else:
+							self.mip.SetText(mins)
+							self.oip.SetText(hrs)
+							self.mit.SetText(mins)
+							self.oit.SetText(hrs)
+					else:
+						self.mit.SetText(mins)
+						self.oit.SetText(hrs)
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1900:
 			try:
@@ -1086,10 +1146,6 @@ class TrenoWindow(BWindow):
 				self.mft.MarkAsInvalid(True)
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 1112:
-			#dopt=datetime.timedelta(hours=int(self.oi.Text()),minutes=int(self.mi.Text()))
-			#doat=datetime.timedelta(hours=int(self.of.Text()),minutes=int(self.mf.Text
-
-			#prima di mandare messaggio creazione accessori controllare che ci sia spazio sia in partenza che in arrivo
 			titanic=True
 			if self.chkaccp.Value()==0:
 				dtp=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
@@ -1151,66 +1207,6 @@ class TrenoWindow(BWindow):
 					mex.AddString("ntaa",self.taa) #nome tipo accessori
 					mex.AddInt8("codacca",self.codacca) #codice accessori
 				be_app.WindowAt(0).PostMessage(mex)
-#				if self.chkaccp.Value()==0:
-#					print("mando creazione accessori partenza")
-#					mex=BMessage(1003)
-#					mex.AddInt8("oi",int(self.oip.Text())) #ora inizio
-#					mex.AddInt8("mi",int(self.mip.Text())) #minuto inizio
-#					mex.AddInt8("of",int(self.oit.Text())) #ora fine
-#					mex.AddInt8("mf",int(self.mit.Text())) #minuto fine
-#					mex.AddString("csp",self.cp) #codice stazione partenza
-#					mex.AddString("csa",self.cp) #codice stazione arrivo
-#					mex.AddString("nsp",self.np) #nome stazione partenza
-#					mex.AddString("nsa",self.np) #nome stazione arrivo
-#					mex.AddString("nta",self.tap) #nome tipo accessori
-#					mex.AddInt8("codacc",self.codaccp) #codice accessori
-#					mex.AddString("materiale",self.mat)
-#					mex.AddInt8("parte",self.parte) #parte del turno
-#					mex.AddInt8("totale",self.totale) #totale del turno
-#					mex.AddString("name",self.name.Text()) #nome accessori/numero treno
-#					be_app.WindowAt(0).PostMessage(mex)
-#	#				mes.AddBool("acpb",True)
-#	#				mes.AddInt8("acpo",int(self.oip.Text()))
-#	#				mes.AddInt8("acpm",int(self.mip.Text()))
-#	#			else:
-#	#				mes.AddBool("acpb",False)
-#	#				mes.AddInt8("acpo",0)
-#	#				mes.AddInt8("acpm",0
-#				print("mando creazione treno")
-#				mes=BMessage(1102)
-#				mes.AddString("name",self.name.Text())
-#				mes.AddInt8("oi",int(self.oit.Text())) #ora inizio
-#				mes.AddInt8("mi",int(self.mit.Text())) #minuto inizio
-#				mes.AddInt8("of",int(self.oft.Text())) #ora fine
-#				mes.AddInt8("mf",int(self.mft.Text())) #minuto fine
-#				mes.AddString("csp",self.cp) #codice stazione partenza
-#				mes.AddString("csa",self.ca) #codice stazione arrivo
-#				mes.AddString("nsp",self.np) #nome stazione partenza
-#				mes.AddString("nsa",self.na) #nome stazione arrivo
-#				mes.AddString("ncond",self.ncond) # nome tipo condotta
-#				mes.AddInt8("ccond",self.ccond) # codice tipo condotta
-#				mes.AddString("materiale",self.mat)
-#				mes.AddInt8("parte",self.parte) #parte del turno
-#				mes.AddInt8("totale",self.totale) #totale del turno
-#				be_app.WindowAt(0).PostMessage(mes)
-#				if self.chkacca.Value()==0:
-#					print("mando creazione accessori arrivo")
-#					mex=BMessage(1003)
-#					mex.AddInt8("oi",int(self.oft.Text())) #ora inizio
-#					mex.AddInt8("mi",int(self.mft.Text())) #minuto inizio
-#					mex.AddInt8("of",int(self.ofa.Text())) #ora fine
-#					mex.AddInt8("mf",int(self.mfa.Text())) #minuto fine
-#					mex.AddString("csp",self.ca) #codice stazione partenza
-#					mex.AddString("csa",self.ca) #codice stazione arrivo
-#					mex.AddString("nsp",self.na) #nome stazione partenza
-#					mex.AddString("nsa",self.na) #nome stazione arrivo
-#					mex.AddString("nta",self.taa) #nome tipo accessori
-#					mex.AddInt8("codacc",self.codacca) #codice accessori
-#					mex.AddString("materiale",self.mat)
-#					mex.AddInt8("parte",self.parte) #parte del turno
-#					mex.AddInt8("totale",self.totale) #totale del turno
-#					mex.AddString("name",self.name.Text()) #nome accessori/numero treno
-#					be_app.WindowAt(0).PostMessage(mex)
 			else:
 				ask=BAlert('cle', "Mancata corrispondenza ora inizio accessori e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 				self.alertWind.append(ask)
@@ -1327,11 +1323,11 @@ class MainWindow(BWindow):
 					mitm=BMenuItem(name, BMessage(k),name[0],0)
 					menu.AddItem(mitm)
 			self.bar.AddItem(menu)
-		a=BFont() #+ a.Size()
+		a=BFont()
 		self.box = BBox(BRect(0,0,bckgnd_bounds.Width(),bckgnd_bounds.Height()),"Underbox",0x0202|0x0404,border_style.B_FANCY_BORDER)
 		self.bckgnd.AddChild(self.box, None)
 		self.box.AddChild(self.bar, None)
-		self.listaturni = ScrollView(BRect(4 , a.Size()+24+barheight, bounds.Width()- 18, bounds.Height() - 4 ), 'OptionsScrollView')# 24 + barheight
+		self.listaturni = ScrollView(BRect(4 , a.Size()+24+barheight, bounds.Width()- 18, bounds.Height() - 4 ), 'OptionsScrollView')
 		self.box.AddChild(self.listaturni.sv, None)
 		self.turno=BTextControl(BRect(4,4+barheight,150,a.Size()),"turn_name", "FV:","1000",BMessage(1800))
 		self.box.AddChild(self.turno, None)
@@ -1339,7 +1335,6 @@ class MainWindow(BWindow):
 		self.box.AddChild(self.addBtn, None)
 		self.remBtn=BButton(BRect(305, 4+barheight, 445,a.Size()),'RemBtn','Rimuovi turno/elemento',BMessage(1802),B_FOLLOW_TOP|B_FOLLOW_LEFT)
 		self.box.AddChild(self.remBtn, None)
-		
 		perc=BPath()
 		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
 		ent=BEntry(os.path.dirname(os.path.realpath(__file__))+"/deselect.jpg")#"/boot/home/Apps/ScrittoreTurni/orloi.jpg")
