@@ -31,7 +31,7 @@ glock=0
 
 cod_stazioni=[("UD","Udine"),("UDFS","Udine fascio sacca"),("BASL","Basiliano"),("CDRP","Codroipo"),("CSRS","Casarsa"),("CUS","Cusano"),("PN","Pordenone"),("FONT","Fontanafredda"),("SAC","Sacile"),("ORSG","Orsago"),("PIAN","Pianzano"),("CON","Conegliano"),("SUS","Susegana"),("SPR","Spresiano"),("LANC","Lancenigo"),("TVCL","Treviso centrale"),("TVDL","Treviso deposito"),("STRV","San Trovaso"),("PREG","Preganziol"),("MOGL","Mogliano Veneto"),("MSOS","Mestre ospedale"),("MSCL","Mestre centrale"),("MSDL","Mestre deposito"),("VEPM","Venezia porto marghera"),("VESL","Venezia Santa Lucia"),("BUT","Buttrio"),("MANZ","Manzano"),("SGAN","San Giovanni al Natisone"),("CORM","Cormons"),("GOCL","Gorizia centrale"),("SAGR","Sagrado"),("RON","Ronchi nord"),("MONF","Monfalcone"),("SIST","Sistiana"),("BVDA","Bivio d'Aurisina"),("MIRM","Miramare"),("TSCL","Trieste centrale"),("TSDL","Trieste deposito"),("TSA","Trieste airport"),("CRVG","Cervignano"),("SGIO","San Giorgio di Nogaro"),("LAT","Latisana"),("PGRU","Portogruaro"),("SSTI","San Stino di Livenza"),("SDON","San Donà di Piave"),("QUDA","Quarto d'Altino"),("SGDC","San Giovanni di Casarsa"),("SVIT","San Vito al Tagliamento"),("CORD","Cordovado Sesto"),("TEGL","Teglio veneto"),("SACL","Sacile San Liberale"),("BUDJ","Budoia"),("AVNO","Aviano"),("MONT","Montereale valcellina"),("MAN","Maniago"),("TRIC","Tricesimo"),("TARC","Tarcento"),("ARTG","Artegna"),("GEM","Gemona"),("VENZ","Venzone"),("CRNI","Carnia"),("PONT","Pontebba"),("UGOV","Ugovizza"),("TARB","Tarvisio boscoverde"),("PALM","Palmanova"),("RISN","Risano")]
 legenda = sorted(cod_stazioni, key=lambda x: x[1])
-
+tipocond=[("Agente solo",1),("Agente Unico",2),("Doppio Agente/1",3),("Doppio Agente/2",4)]
 class PButton(BButton):
 	def __init__(self,frame,name,label,msg,resizingMode,immagine):
 		self.immagine = immagine
@@ -632,7 +632,7 @@ class TrenoWindow(BWindow):
 	totale=1
 	tipoaccp=[("Accessori in partenza",1),("Cambio volante in partenza",3),("Parking in partenza",5)]
 	tipoacca=[("Accessori in arrivo",2),("Cambio volante in arrivo",4),("Parking in arrivo",6),("Cambio banco",7)]
-	tipocond=[("Agente solo",1),("Agente Unico",2),("Doppio Agente/1",3),("Doppio Agente/2",4)]
+	#tipocond=[("Agente solo",1),("Agente Unico",2),("Doppio Agente/1",3),("Doppio Agente/2",4)]
 	def __init__(self):
 		BWindow.__init__(self, BRect(300,150,1000,365), "Treno", window_type.B_FLOATING_WINDOW,  B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "bckgnd_View", 8, 20000000)
@@ -730,7 +730,7 @@ class TrenoWindow(BWindow):
 		
 		self.cond=BMenu("Tipo condotta")
 		self.cond.SetLabelFromMarked(True)
-		for z in self.tipocond:
+		for z in tipocond:
 			self.cond.AddItem(Condotta(z))
 		self.condmf = BMenuField(BRect(rect.Width()/3+8, 112, rect.Width()*2/3-8, 132), 'pop1', 'Condotta:', self.cond,B_FOLLOW_TOP)
 		self.condmf.SetDivider(80.0)
@@ -1344,12 +1344,14 @@ class MainWindow(BWindow):
 			self.deselectBtn=PButton(BRect(bckgnd_bounds.right-32, 4+barheight, bckgnd_bounds.right-2,34+barheight),'DeselectBtn','▤',BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT,img1)#▤⌧
 		else:
 			lab="▤"#▤⌧
-			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'GetTimeButton',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
+			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'DeselectBtn',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
 		self.box.AddChild(self.deselectBtn, None)
 		self.fp=BFilePanel(B_SAVE_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
 		self.fp.SetSaveText("Turni.trn")
-
+		self.ofp=BFilePanel(B_OPEN_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
+		self.ofp.SetPanelDirectory("/boot/home/Desktop")
+		self.ofp.SetSaveText("Turni.trn")
 	def FrameResized(self,x,y):
 		resiz=False
 		if x<974:
@@ -1473,7 +1475,7 @@ class MainWindow(BWindow):
 			self.turno.SetText(str(v))
 		elif msg.what == 1802:
 		#rimuovi turno
-			if self.listaturni.lv.CountItems()>0:#self.listaturni.lv.FullListCountItems()>0:
+			if self.listaturni.lv.CountItems()>0:
 				if self.listaturni.lv.CurrentSelection()>-1:
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()))
 				else:
@@ -1488,22 +1490,59 @@ class MainWindow(BWindow):
 					for g in self.listaturni.lv.Items():
 						self.listaturni.lv.RemoveItem(g)
 		elif msg.what == 2:
-		#pannello salvafile turni
-			
+		#pannello salva file turni
 			self.fp.Show()
-#			#with open("test.txt", "a") as myfile:
-#			#myfile.write("appended text")
-#			i=0
-#			while i < self.listaturni.lv.CountItems():
-#				ita=self.listaturni.lv.ItemAt(i)
-#				if type(ita)==BStringItem:
-#				elif type(ita)==PausItem:
-#				elif type(ita)==AccItem:
-#				elif type(ita)==TrenoItem:
-#				elif type(ita)==VettItem:
-#				i+=1
+		elif msg.what == 1:
+		#pannello apri file turni
+			self.ofp.Show()
+		elif msg.what == 45371:
+			#carica turni
+			ofpath=msg.FindString("path")
+			tlist=[]
+			with open(ofpath) as f:
+				for r in f:
+					tlist.append((r[0],r[1:]))
+			print(tlist)
+			i=0
+			while i<(len(tlist)):
+				t = tlist[i][0]
+				s = tlist[i][1]
+				if t == "@":
+					thisroot=BStringItem(s)
+					self.listaturni.lv.AddItem(thisroot)
+					self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(thisroot),self.listaturni.lv.CountItems()-1)
+				elif t == "#":
+					cis=self.listaturni.lv.CountItemsUnder(thisroot,True)
+					vett=self.estrai_vett(s)
+					self.tmpElem.append(vett)
+					self.listaturni.lv.AddUnder(vett,thisroot)
+					if cis!=0:
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vett),self.listaturni.lv.IndexOf(thisroot)+cis+1)
+				elif t == "?":
+					cis=self.listaturni.lv.CountItemsUnder(thisroot,True)
+					pau=self.estrai_pau(s)
+					self.tmpElem.append(pau)
+					self.listaturni.lv.AddUnder(pau,thisroot)
+					if cis!=0:
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(thisroot)+cis+1)
+				elif t == "§":
+					cis=self.listaturni.lv.CountItemsUnder(thisroot,True)
+					acc=self.estrai_acc(s)
+					self.tmpElem.append(acc)
+					self.listaturni.lv.AddUnder(acc,thisroot)
+					if cis!=0:
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.IndexOf(thisroot)+cis+1)
+				elif t == "&":
+					cis=self.listaturni.lv.CountItemsUnder(thisroot,True)
+					trn=self.estrai_trn(s)
+					self.tmpElem.append(trn)
+					self.listaturni.lv.AddUnder(trn,thisroot)
+					if cis!=0:
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(thisroot)+cis+1)
+				i+=1
+					
 		elif msg.what == 54173:
-			#Save turni
+			#Salva turni
 			b=entry_ref()
 			self.fp.GetPanelDirectory(b)
 			c=BEntry(b)
@@ -1513,16 +1552,24 @@ class MainWindow(BWindow):
 			e = msg.FindString("name")
 			completepath = savepath +"/"+ e
 			print(completepath)
-			 with open(completepath, "a") as myfile:
-				 i=0
-				 while i < self.listaturni.lv.CountItems():
+			with open(completepath, "a") as myfile:
+				i=0
+				while i < self.listaturni.lv.CountItems():
+				# @,#,§,?
 					ita=self.listaturni.lv.ItemAt(i)
 					if type(ita)==BStringItem:
+						txt="@"+ita.Text()+"\n"
 					elif type(ita)==PausItem:
+						#delta=ita.fine-ita.inizio
+						txt="?"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==AccItem:
+						txt="§"+ita.nta+"·"+str(ita.cta)+"·"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==TrenoItem:
+						txt="&"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.ccond)+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==VettItem:
+						txt="#"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
 					i+=1
+					myfile.write(txt)
 			#return
 		elif msg.what == 1001:
 			print("1001 inserimento pausa")
@@ -1534,11 +1581,9 @@ class MainWindow(BWindow):
 			parteturno=(parte,totale)
 			dt = datetime.timedelta(hours=do,minutes=dm)
 			n=msg.FindString("name")
-			#print(self.listaturni.lv.CountItems())
 			if self.listaturni.lv.CountItems()>0:
 			#se prima riga ignora
 				if self.listaturni.lv.CurrentSelection()>-1:
-				#fatto
 				#è selezionato qualcosa
 					selit=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 					if type(selit)==BStringItem:
@@ -1563,7 +1608,6 @@ class MainWindow(BWindow):
 						pau=PausItem(n,i,dt,sta,parteturno)
 						self.tmpElem.append(pau)
 						supit=self.listaturni.lv.Superitem(selit)
-						#it=self.listaturni.lv.CountItemsUnder(supit,True)
 						self.listaturni.lv.AddUnder(pau,supit)
 						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(selit))
 				else:
@@ -1699,41 +1743,39 @@ class MainWindow(BWindow):
 									dm=(differ.seconds % 3600) // 60
 									do=differ.days * 24 + differ.seconds // 3600
 									dt = datetime.timedelta(hours=do,minutes=dm)
-									if True: # inserito per non adattare indenting
-												selit = itm
-												i=selit.fine
-												sta=selit.sta
-												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-												self.tmpElem.append(pau)
-												supit=self.listaturni.lv.Superitem(selit)
-												self.listaturni.lv.AddUnder(pau,supit)
-												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(selit))
-												self.listaturni.lv.AddUnder(accp,supit)
-												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.IndexOf(pau))
-												self.listaturni.lv.AddUnder(trn,supit)
-												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(accp))
-												if aa:
-													self.listaturni.lv.AddUnder(acca,supit)
-													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
+									selit = itm
+									i=selit.fine
+									sta=selit.sta
+									pau=PausItem("Pausa",i,dt,sta,(parte,totale))
+									self.tmpElem.append(pau)
+									supit=self.listaturni.lv.Superitem(selit)
+									self.listaturni.lv.AddUnder(pau,supit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(selit))
+									self.listaturni.lv.AddUnder(accp,supit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.IndexOf(pau))
+									self.listaturni.lv.AddUnder(trn,supit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(accp))
+									if aa:
+										self.listaturni.lv.AddUnder(acca,supit)
+										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 								else:
 									#aggiungi treno
 									dm=(differ.seconds % 3600) // 60
 									do=differ.days * 24 + differ.seconds // 3600
 									dt = datetime.timedelta(hours=do,minutes=dm)
-									if True: # inserito per non adattare indenting
-												selit = itm
-												i=selit.fine
-												sta=selit.sta
-												pau=PausItem("Pausa",i,dt,sta,(parte,totale))
-												self.tmpElem.append(pau)
-												supit=self.listaturni.lv.Superitem(selit)
-												self.listaturni.lv.AddUnder(pau,supit)
-												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(selit))
-												self.listaturni.lv.AddUnder(trn,supit)
-												self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(pau))
-												if aa:
-													self.listaturni.lv.AddUnder(acca,supit)
-													self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
+									selit = itm
+									i=selit.fine
+									sta=selit.sta
+									pau=PausItem("Pausa",i,dt,sta,(parte,totale))
+									self.tmpElem.append(pau)
+									supit=self.listaturni.lv.Superitem(selit)
+									self.listaturni.lv.AddUnder(pau,supit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(selit))
+									self.listaturni.lv.AddUnder(trn,supit)
+									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(pau))
+									if aa:
+										self.listaturni.lv.AddUnder(acca,supit)
+										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 							elif differ == datetime.timedelta(minutes=0):
 								print("step 1.3")
 								if ap:
@@ -2145,6 +2187,67 @@ class MainWindow(BWindow):
 						self.listaturni.lv.AddUnder(acc,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 			glock=0
 		return BWindow.MessageReceived(self,msg)
+	def estrai_vett(self,s):
+		cmd=s.split("·")
+		hmp=cmd[1].split(":")
+		hma=cmd[2].split(":")
+		for stz in cod_stazioni:
+			if stz[0] == cmd[3]:
+				nstp=stz[1]
+			if stz[0] == cmd[4]:
+				nsta=stz[1]
+		stp=(cmd[3],nstp)
+		sta=(cmd[4],nsta)
+		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
+		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
+		return VettItem(cmd[0],i,f,stp,sta,(cmd[5],cmd[6]))
+	def estrai_acc(self,s):
+		cmd=s.split("·")
+		ta=(cmd[0],cmd[1])
+		hmp=cmd[3].split(":")
+		hma=cmd[4].split(":")
+		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
+		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
+		for stz in cod_stazioni:
+			if stz[0] == cmd[5]:
+				nstp=stz[1]
+			if stz[0] == cmd[6]:
+				nsta=stz[1]
+		stp=(cmd[5],nstp)
+		sta=(cmd[6],nsta)
+		return AccItem(ta,cmd[2],i,f,stp,sta,cmd[7],(cmd[8],cmd[9]))
+	def estrai_trn(self,s):
+		cmd=s.split("·")
+		hmp=cmd[1].split(":")
+		hma=cmd[2].split(":")
+		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
+		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
+		for stz in cod_stazioni:
+			if stz[0] == cmd[3]:
+				nstp=stz[1]
+			if stz[0] == cmd[4]:
+				nsta=stz[1]
+		stp=(cmd[3],nstp)
+		sta=(cmd[4],nsta)
+		for cond in tipocond:
+			if cond[1]==int(cmd[5]):
+				rcond=(cond[0],cond[1])
+				break
+		return TrenoItem(cmd[0],i,f,stp,sta,rcond,cmd[6],(cmd[7],cmd[8]))
+	def estrai_pau(self,s):
+		cmd=s.split("·")
+		hmp=cmd[1].split(":")
+		hma=cmd[2].split(":")
+		for stz in cod_stazioni:
+			if stz[0] == cmd[3]:
+				nstp=stz[1]
+		stp=(cmd[3],nstp)
+		sta=(cmd[3],nstp)
+		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
+		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
+		dt=f-i
+		return PausItem(cmd[0],i,dt,stp,(cmd[4],cmd[5]))
+		
 	def checkpreviouscompatibility(self,prev,ittem):
 		ret = True
 		if prev.fine>ittem.inizio:
@@ -2219,6 +2322,7 @@ class AccItem(BListItem):
 		self.name=name
 		#self.label=self.name
 		self.nta=ta[0]
+		self.cta=ta[1]
 		self.codacc=ta[1]
 		fon=BFont()
 		self.stp=stp
@@ -2374,6 +2478,38 @@ class App(BApplication):
 	def ReadyToRun(self):
 		self.window = MainWindow()
 		self.window.Show()
+	def RefsReceived(self, msg):
+		if msg.what == B_REFS_RECEIVED:
+			i = 0
+			while True:
+				try:
+					bitul=False
+					er = entry_ref()
+					rito=msg.FindRef("refs", i,er)
+					entry = BEntry(er,True)
+					# p=BPath()
+					# entry.GetPath(p)
+					#print(rito,er,p.Path(),entry.Exists())
+					if entry.Exists():
+						# print("dentro entry.exists()")
+						percors=BPath()
+						entry.GetPath(percors)
+						ofpmsg=BMessage(45371)
+						ofpmsg.AddString("path",percors.Path())
+						be_app.WindowAt(0).PostMessage(ofpmsg)
+					else:
+						break
+				except:
+					#er = None
+					bitul=True
+				print(er)
+				#if er is None:
+				if bitul:
+					print("rompo loop")
+					break
+				i+=1
+			print("terminata ricerca refs")
+		BApplication.RefsReceived(self,msg)
 	def MessageReceived(self,msg):
 		if msg.what == B_SAVE_REQUESTED:
 			e = msg.FindString("name")
@@ -2381,6 +2517,7 @@ class App(BApplication):
 			messaggio.AddString("name",e)
 			be_app.WindowAt(0).PostMessage(messaggio)
 			return
+		
 		BApplication.MessageReceived(self,msg)
 
 #	def Pulse(self):
