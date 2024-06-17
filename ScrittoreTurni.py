@@ -1409,7 +1409,52 @@ class MainWindow(BWindow):
 				self.acc_window = AccWindow()
 				self.tmpWind.append(self.acc_window)
 				self.acc_window.Show()
+		elif msg.what == 10:
+		#estrai treni
+			ntreni = []
+			#treni = []
+			vett_comandate = []
+			for og in self.listaturni.lv.Items():
+				if type(og)!=BStringItem:
+					if type(og)!=VettItem and type(og)!=PausItem:
+						try:
+							print("elaboro:",og.label)
+							num=int(og.name)
+							go=True
+							for x in ntreni:
+								if x[0]==num:
+									go=False
+									break
+							if go:
+								ntreni.append((num,[]))
+								if type(og) == TrenoItem:
+									oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+									#ntreni[-1][1].append(oggetto)
+								elif type(og) == AccItem:
+									oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+								ntreni[-1][1].append(oggetto)
+							#elif type(og) == VettItem:
+							#	oggetto=GVett(
+							
+							else:
+								match=[x for x in ntreni if x[0] == num]
+								if type(og) == TrenoItem:
+									oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+									#match[0][1].append(oggetto)
+								elif type(og) == AccItem:
+									oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+								match[0][1].append(oggetto)
+						except:
+							#si tratta di Riserva #TODO
+							pass
+							#if type(og) == VettItem:
+							#	nam = og.name
+					else:
+						#gestiamo VettItems o PausItems #TODO
+						pass
+			print(ntreni)
 		elif msg.what == 1020:
+		#deseleziona listview
 			self.listaturni.lv.DeselectAll()
 		elif msg.what == 1800:
 		#controlla nome turno
@@ -1540,7 +1585,6 @@ class MainWindow(BWindow):
 					if cis!=0:
 						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(thisroot)+cis+1)
 				i+=1
-					
 		elif msg.what == 54173:
 			#Salva turni
 			b=entry_ref()
@@ -1570,7 +1614,6 @@ class MainWindow(BWindow):
 						txt="#"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
 					i+=1
 					myfile.write(txt)
-			#return
 		elif msg.what == 1001:
 			print("1001 inserimento pausa")
 		#aggiungi pausa
@@ -2459,6 +2502,24 @@ class PausItem(BListItem):
 		#	ep=BPoint(frame.right-3,frame.bottom-(frame.bottom-frame.top)/2)
 		#	owner.StrokeLine(sp,ep)
 		owner.SetLowColor(255,255,255,255)
+
+class GTreno:
+	def __init__(self,num,orai,stazi,oraf,stazf,fv):
+		self.num = num
+		self.orai=orai
+		self.oraf=oraf
+		self.stazi=stazi
+		self.stazf=stazf
+		self.fv = fv
+class GAcc:
+	def __init__(self,num,orai,stazi,oraf,stazf,fv):
+		self.num = num
+		self.orai=orai
+		self.oraf=oraf
+		self.stazi=stazi
+		self.stazf=stazf
+		self.fv = fv
+# class GVett:
 
 class ScrollView:
 	HiWhat = 53 #Doppioclick
