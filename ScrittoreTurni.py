@@ -174,10 +174,10 @@ class VettWindow(BWindow):
 		if ent.Exists():
 			ent.GetPath(perc)
 			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-			self.getTimeBtn=PButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,46+2*a.Size()),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
+			self.getTimeBtn=PButton(BRect(rect.Width()/2-40,rect.Height()/2+a.Size()+4,rect.Width()/2-8,rect.Height()-8),'GetTimeButton','',BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT,img1)
 		else:
 			lab="🕒"
-			self.getTimeBtn=BButton(BRect(rect.Width()-40,28+a.Size(),rect.Width()-8,32+2*a.Size()),'GetTimeButton',lab,BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
+			self.getTimeBtn=BButton(BRect(rect.Width()/2-40,rect.Height()/2+a.Size()+4,rect.Width()/2-8,rect.Height()-8),'GetTimeButton',lab,BMessage(1004),B_FOLLOW_BOTTOM|B_FOLLOW_RIGHT)
 		self.bckgnd.AddChild(self.getTimeBtn,None)
 		
 		self.bckgnd.AddChild(self.addBtn,None)
@@ -437,6 +437,7 @@ class AccWindow(BWindow):
 		self.bckgnd.AddChild(self.abar,None)
 	def checkvalues(self):
 		ret=True
+		self.addBtn.SetEnabled(True)
 		for testo in {self.oi.Text(),self.mi.Text(),self.of.Text(),self.mf.Text()}:
 			try:
 				int(testo)
@@ -579,7 +580,13 @@ class AccWindow(BWindow):
 				mex.AddString("nsa",self.na) #nome stazione arrivo
 				mex.AddString("nta",self.ta) #nome tipo accessori
 				mex.AddInt8("codacc",self.codacc) #codice accessori
-				mex.AddString("materiale",self.mat)
+				if self.codacc == 9:
+					oldmat=self.mat
+					self.mat = ""
+					mex.AddString("materiale",self.mat)
+					self.mat = oldmat
+				else:
+					mex.AddString("materiale",self.mat)
 				mex.AddInt8("parte",self.parte) #parte del turno
 				mex.AddInt8("totale",self.totale) #totale del turno
 				mex.AddString("name",self.treno.Text()) #nome accessori/numero treno
@@ -784,32 +791,32 @@ class TrenoWindow(BWindow):
 			try:
 				int(self.name.Text())
 			except:
-				print("nome treno sbagliato")
+				# print("nome treno sbagliato")
 				ret=False
 				self.name.MarkAsInvalid(True)
 			if self.cp==None or self.ca==None:
-				print("mancano stazione di partenza e/o di arrivo")
+				# print("mancano stazione di partenza e/o di arrivo")
 				ret=False
 			if self.parte>self.totale:
-				print("la parte è superiore al totale")
+				# print("la parte è superiore al totale")
 				ret=False
 			dtit=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
 			dtft=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
 			if dtit>=dtft:
-				print("l'ora di partenza è successiva all'ora di arrivo")
+				# print("l'ora di partenza è successiva all'ora di arrivo")
 				ret=False
 			if self.chkaccp.Value()==0:
 				dtap=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
 				if dtap>dtit:
-					print("l'ora di inizio accessori in partenza è successiva all'ora di partenza")
+					# print("l'ora di inizio accessori in partenza è successiva all'ora di partenza")
 					ret=False
 			if self.chkacca.Value()==0:
 				dtaa=datetime.timedelta(hours=int(self.ofa.Text()),minutes=int(self.mfa.Text()))
 				if dtaa<dtft:
-					print("l'ora di fine accessori in arrivo è antecedente all'orario di arrivo")
+					# print("l'ora di fine accessori in arrivo è antecedente all'orario di arrivo")
 					ret=False
 			if self.ccond == 0:
-				print("non è stato selezionato un modulo di condotta")
+				# print("non è stato selezionato un modulo di condotta")
 				ret=False
 		return ret
 	def MessageReceived(self, msg):
@@ -1151,16 +1158,16 @@ class TrenoWindow(BWindow):
 				dtp=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
 				if be_app.WindowAt(0).listaturni.lv.CountItems()>0:
 					if be_app.WindowAt(0).listaturni.lv.CurrentSelection()>-1:
-						print("è selezionato qualcosa")
+						# print("è selezionato qualcosa")
 						itm = be_app.WindowAt(0).listaturni.lv.ItemAt(be_app.WindowAt(0).listaturni.lv.CurrentSelection())
 						supitm = be_app.WindowAt(0).listaturni.lv.Superitem(itm)
 						if supitm != None:
-							print("step 1, selezionato elemento di turno")
+							# print("step 1, selezionato elemento di turno")
 							differ = dtp - itm.fine
 							if differ < datetime.timedelta(minutes=0):
 								titanic=False
 					else:
-						print("niente di selezionato")
+						# print("niente di selezionato")
 						if be_app.WindowAt(0).listaturni.lv.CountItems()>1:
 							itm = be_app.WindowAt(0).listaturni.lv.ItemAt(be_app.WindowAt(0).listaturni.lv.CountItems()-1)
 							supitm = be_app.WindowAt(0).listaturni.lv.Superitem(itm)
@@ -1418,41 +1425,85 @@ class MainWindow(BWindow):
 				if type(og)!=BStringItem:
 					if type(og)!=VettItem and type(og)!=PausItem:
 						try:
-							print("elaboro:",og.label)
+							#try:
+							#	num=int(og.name)
+							#except:
+							#	print("errore in:",og.name)
+							#	num=0
 							num=int(og.name)
 							go=True
-							for x in ntreni:
+							for x in ntreni: #controllo se esiste già in ntreni
 								if x[0]==num:
 									go=False
 									break
 							if go:
+								#il treno non è in ntreni
 								ntreni.append((num,[]))
 								if type(og) == TrenoItem:
-									oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+									#print(self.listaturni.lv.Superitem(og).Text())
+									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
 									#ntreni[-1][1].append(oggetto)
+									oggetto=og
 								elif type(og) == AccItem:
-									oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+									#print(self.listaturni.lv.Superitem(og).Text())
+									#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),og.int(totale))
+									oggetto=og
 								ntreni[-1][1].append(oggetto)
 							#elif type(og) == VettItem:
 							#	oggetto=GVett(
 							
 							else:
+								#il treno esiste in ntreni
 								match=[x for x in ntreni if x[0] == num]
 								if type(og) == TrenoItem:
-									oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
-									#match[0][1].append(oggetto)
+									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
+									##match[0][1].append(oggetto)
+									oggetto = og
 								elif type(og) == AccItem:
-									oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,self.listaturni.lv.Superitem(og).Text())
+									#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
+									oggetto = og
 								match[0][1].append(oggetto)
 						except:
-							#si tratta di Riserva #TODO
+						#	print(og.label)
+						#	#si tratta di Riserva #TODO
 							pass
 							#if type(og) == VettItem:
 							#	nam = og.name
 					else:
 						#gestiamo VettItems o PausItems #TODO
 						pass
-			print(ntreni)
+			#print(ntreni)
+			for x in ntreni:
+				lowgacc=(datetime.timedelta(hours=23,minutes=59),(None,None),2,0)#1 è parte turno, esempio. se accessori iniziano alle 23.50, ma il cambio volante inizia alle 00:10 i primi tempi accessori sono 23:50
+				lowgtrenot=datetime.timedelta(hours=23,minutes=59)
+				#lowgaccn=x[0]
+				highgacc=(datetime.timedelta(hours=0,minutes=0),(None,None),1,0)
+				hightrenot=datetime.timedelta(hours=0,minutes=0)
+				outp=None
+				outa=None
+				for y in x[1]:
+					if type(y)==AccItem:
+						if int(y.codacc) in [ 1, 3, 5 ]: #se è un accessorio in partenza
+							if int(y.parte) < lowgacc[2]:
+								lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+								outp=y
+							else:
+								if y.inizio<=lowgacc[0]:
+									lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+									outp=y
+						elif int(y.codacc) in [ 2,4,6,7 ]:
+							if int(y.parte) > highgacc[2]:
+								highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+								outa=y
+							else:
+								if y.fine>=highgacc[0]:
+									highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+									outa=y
+					elif type(y)==TrenoItem:
+				if outp!=None:
+					print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
+				if outa!=None:
+					print("Orario ultimo accessorio in arrivo di",x[0],":",highgacc[0],highgacc[1][0])#,highgacc[2],outa)
 		elif msg.what == 1020:
 		#deseleziona listview
 			self.listaturni.lv.DeselectAll()
@@ -1476,11 +1527,12 @@ class MainWindow(BWindow):
 						ask=BAlert('cle', "Questo turno c\'è già", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 						self.alertWind.append(ask)
 						ask.Go()
+						break
 			if chk:
 				if self.listaturni.lv.CurrentSelection()>-1:
 					sel=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 					if type(sel)==BStringItem:
-						print("it is a superitem",sel.Text())
+						#print("it is a superitem",sel.Text())
 						#è un superitem
 						for el in self.listaturni.lv.Items():
 							if type(el) == BStringItem:
@@ -1497,7 +1549,7 @@ class MainWindow(BWindow):
 									break
 							indt+=1
 					else:
-						print("looking for its superitem")
+						#print("looking for its superitem")
 						#cerca suo superitem
 						supersel=self.listaturni.lv.Superitem(sel)
 						#collassa tutto e seleziona supersel
@@ -1513,7 +1565,10 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddItem(BStringItem(self.turno.Text()),indt)
 									break
 				else:
-					self.listaturni.lv.AddItem(BStringItem(self.turno.Text()))
+					bli=BStringItem(self.turno.Text())
+					self.listaturni.lv.AddItem(bli)
+					self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(bli),self.listaturni.lv.CountItems()-1)
+					
 				self.listaturni.lv.DeselectAll()
 			v=int(self.turno.Text())
 			v+=1
@@ -1547,7 +1602,7 @@ class MainWindow(BWindow):
 			with open(ofpath) as f:
 				for r in f:
 					tlist.append((r[0],r[1:]))
-			print(tlist)
+			#print(tlist)
 			i=0
 			while i<(len(tlist)):
 				t = tlist[i][0]
@@ -1595,7 +1650,7 @@ class MainWindow(BWindow):
 			savepath=d.Path()
 			e = msg.FindString("name")
 			completepath = savepath +"/"+ e
-			print(completepath)
+			#print(completepath)
 			with open(completepath, "a") as myfile:
 				i=0
 				while i < self.listaturni.lv.CountItems():
@@ -1615,7 +1670,7 @@ class MainWindow(BWindow):
 					i+=1
 					myfile.write(txt)
 		elif msg.what == 1001:
-			print("1001 inserimento pausa")
+			#print("1001 inserimento pausa")
 		#aggiungi pausa
 			dm=msg.FindInt8("deltam")
 			do=msg.FindInt8("deltao")
@@ -1632,7 +1687,7 @@ class MainWindow(BWindow):
 					if type(selit)==BStringItem:
 						#è un superitem pertanto vedo se aggiungere pausa alla fine
 						it=self.listaturni.lv.CountItemsUnder(selit,True)
-						print("itemsUnder",it)
+						#print("itemsUnder",it)
 						
 						if it>0:
 							#è un superitem compresso pertanto aggiungo alla fine
@@ -1661,7 +1716,7 @@ class MainWindow(BWindow):
 						#è un superitem
 						it=self.listaturni.lv.CountItemsUnder(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1),True)
 						self.listaturni.lv.Expand(litm)
-						print("elementi sotto ultimo:", it)
+						#print("elementi sotto ultimo:", it)
 						#controllo se è compresso
 						if it>0:
 							#posso aggiungere perché è presente un rigo del turno
@@ -1704,10 +1759,10 @@ class MainWindow(BWindow):
 			self.listaturni.lv.AddUnder(vet,titm)
 			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)
 		elif msg.what == 1333:
-			print("1333 inserimento treno con accessori")
+			# print("1333 inserimento treno con accessori")
 		#aggiungi treno
 			oip=msg.FindInt8("oip")
-			print("Step parziale")
+			# print("Step parziale")
 			oit=msg.FindInt8("oit")
 			oia=msg.FindInt8("oia")
 			mip=msg.FindInt8("mip")
@@ -1753,7 +1808,7 @@ class MainWindow(BWindow):
 				self.tmpElem.append(accp)
 			aa=False
 			if ntaa!=None:
-				print(ntaa,ofa,mfa)	
+				# print(ntaa,ofa,mfa)	
 				dtaa = datetime.timedelta(hours=ofa,minutes=mfa)
 				aa=True
 				acca=AccItem((ntaa,codacca),n,dta,dtaa,(csaa,nsaa),(csaa,nsaa),materiale,(parte,totale))
@@ -1768,7 +1823,7 @@ class MainWindow(BWindow):
 					titm=self.listaturni.lv.Superitem(itm)
 					if titm != None:
 					#esiste superitem ovvero itm è un elemento del turno
-						print("step 1, selezionato elemento di turno")
+						# print("step 1, selezionato elemento di turno")
 						if ap:
 							differ = dtpp - itm.fine
 						else:
@@ -1781,7 +1836,7 @@ class MainWindow(BWindow):
 						else:
 							if differ > datetime.timedelta(minutes=0):
 								if ap:
-									print("step 1.2 aggiunta pausa accessori treno e accessori in arrivo")
+									# print("step 1.2 aggiunta pausa accessori treno e accessori in arrivo")
 									#prepara BMessage(1001) e crea pausa
 									dm=(differ.seconds % 3600) // 60
 									do=differ.days * 24 + differ.seconds // 3600
@@ -1820,7 +1875,7 @@ class MainWindow(BWindow):
 										self.listaturni.lv.AddUnder(acca,supit)
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 							elif differ == datetime.timedelta(minutes=0):
-								print("step 1.3")
+								# print("step 1.3")
 								if ap:
 								#aggiungi senza problemi accessori
 									#aggiungi senza problemi treno
@@ -1844,12 +1899,12 @@ class MainWindow(BWindow):
 						#Selezionato un superitem
 						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
 						self.listaturni.lv.Expand(itm)
-						print("step 2, selezionato turno")
+						# print("step 2, selezionato turno")
 						cit=self.listaturni.lv.CountItemsUnder(itm,True)
 						if cit>0:
 							#controlla ultima ora di fine
 							otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).fine
-							print("otpf:",otpf)
+							# print("otpf:",otpf)
 							if ap:
 								differ = dtpp - otpf
 							else:
@@ -1873,7 +1928,7 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddUnder(pau,selit)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
 									if ap:
-										print("step 2.2, aggiungi pausa, accessori partenza, treno e accessori arrivo")
+										# print("step 2.2, aggiungi pausa, accessori partenza, treno e accessori arrivo")
 										self.listaturni.lv.AddUnder(accp,selit)
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(accp),self.listaturni.lv.IndexOf(pau))
 										self.listaturni.lv.AddUnder(trn,selit)
@@ -1882,7 +1937,7 @@ class MainWindow(BWindow):
 											self.listaturni.lv.AddUnder(acca,selit)
 											self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.IndexOf(trn))
 									else:
-										print("step 2.2, aggiungi pausa, treno e accessori arrivo")
+										# print("step 2.2, aggiungi pausa, treno e accessori arrivo")
 										self.listaturni.lv.AddUnder(trn,selit)
 										self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(pau))
 										if aa:
@@ -1891,7 +1946,7 @@ class MainWindow(BWindow):
 
 								elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
-									print("step 2.3")
+									# print("step 2.3")
 									self.listaturni.lv.AddUnder(trn,itm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.CurrentSelection()+cit+1)
 						else:
@@ -1905,7 +1960,7 @@ class MainWindow(BWindow):
 					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 					titm=self.listaturni.lv.Superitem(lastit)
 					if titm != None:
-						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
+						# print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
 						cit=self.listaturni.lv.CountItemsUnder(titm,True)
 						i= lastit.fine
 						sta=lastit.sta
@@ -1946,7 +2001,7 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddUnder(acca,titm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)	
 					else:
-						print("step 4, niente selezionato, ultimo oggetto è turno FV") # verificare che succede se questo e precedente sono collassati e non selezionati
+						# print("step 4, niente selezionato, ultimo oggetto è turno FV") # verificare che succede se questo e precedente sono collassati e non selezionati
 						fvt=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 						if ap:
 							self.listaturni.lv.AddUnder(accp,fvt)
@@ -1958,7 +2013,7 @@ class MainWindow(BWindow):
 							self.listaturni.lv.AddUnder(acca,fvt)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)	
 		elif msg.what == 1002:
-			print("1002 inserimento vettura")
+			# print("1002 inserimento vettura")
 		#aggiungi vettura
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
@@ -1981,11 +2036,11 @@ class MainWindow(BWindow):
 					titm=self.listaturni.lv.Superitem(itm)
 					if titm != None: 
 					#esiste superitem ovvero sono un elemento del turno
-						print("step 1, selezionato elemento di turno")
+						# print("step 1, selezionato elemento di turno")
 						differ = dtp - itm.fine
 						if self.checkpreviouscompatibility(itm,vet):
 							if differ > datetime.timedelta(minutes=0):
-									print("step 1.2")
+									# print("step 1.2")
 									#prepara BMessage(1001) e crea pausa
 									minutes=(differ.seconds % 3600) // 60
 									hours=differ.days * 24 + differ.seconds // 3600
@@ -2001,7 +2056,7 @@ class MainWindow(BWindow):
 									be_app.WindowAt(0).PostMessage(mx2)
 							elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
-									print("step 1.3")
+									# print("step 1.3")
 									self.listaturni.lv.AddUnder(vet,titm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection())
 						else:
@@ -2012,7 +2067,7 @@ class MainWindow(BWindow):
 						#Selezionato un superitem
 						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
 						self.listaturni.lv.Expand(itm)
-						print("step 2, selezionato turno")
+						# print("step 2, selezionato turno")
 						cit=self.listaturni.lv.CountItemsUnder(itm,True)
 						if cit>0:
 							#controlla ultima ora di fine
@@ -2021,7 +2076,7 @@ class MainWindow(BWindow):
 							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),vet)
 							if proceed:
 								if differ > datetime.timedelta(minutes=0):
-									print("step 2.2")
+									# print("step 2.2")
 									#prepara BMessage(1001) e crea pausa
 									minutes=(differ.seconds % 3600) // 60
 									hours=differ.days * 24 + differ.seconds // 3600
@@ -2038,7 +2093,7 @@ class MainWindow(BWindow):
 									be_app.WindowAt(0).PostMessage(mx2)
 								elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
-									print("step 2.3")
+									# print("step 2.3")
 									self.listaturni.lv.AddUnder(vet,itm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+cit+1)
 							else:
@@ -2053,7 +2108,7 @@ class MainWindow(BWindow):
 					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 					titm=self.listaturni.lv.Superitem(lastit)
 					if titm != None:
-						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
+						# print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
 						#last item is an element, not a superitem
 						cit=self.listaturni.lv.CountItemsUnder(titm,True)
 						#check if otpf è > di vet.inizio
@@ -2061,7 +2116,7 @@ class MainWindow(BWindow):
 						if proceed:
 							differ=vet.inizio-lastit.fine
 							if differ > datetime.timedelta(minutes=0):
-								print("step 3.1")
+								# print("step 3.1")
 								#aggiungi pausa
 								minutes=(differ.seconds % 3600) // 60
 								hours=differ.days * 24 + differ.seconds // 3600
@@ -2078,7 +2133,7 @@ class MainWindow(BWindow):
 								be_app.WindowAt(0).PostMessage(mx2)
 							elif differ == datetime.timedelta(minutes=0):
 								#agiungi senza prolemi
-								print("step 3.2")
+								# print("step 3.2")
 								self.listaturni.lv.AddUnder(vet,titm)
 								con=self.listaturni.lv.CountItemsUnder(titm,True)
 								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(vet)+con-1)
@@ -2087,10 +2142,10 @@ class MainWindow(BWindow):
 							self.alertWind.append(ask)
 							ask.Go()
 					else:
-						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
+						# print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
 						self.listaturni.lv.AddUnder(vet,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 		elif msg.what == 1003:
-			print("1003 inserimento accessori")
+			# print("1003 inserimento accessori")
 		#aggiungi accessori
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
@@ -2117,11 +2172,11 @@ class MainWindow(BWindow):
 					titm=self.listaturni.lv.Superitem(itm)
 					if titm != None: 
 					#esiste superitem ovvero sono un elemento del turno
-						print("step 1, selezionato elemento di turno")
+						# print("step 1, selezionato elemento di turno")
 						differ = dtp - itm.fine
 						if self.checkpreviouscompatibility(itm,acc):
 							if differ > datetime.timedelta(minutes=0):
-									print("step 1.2")
+									# print("step 1.2")
 									#prepara BMessage(1001) e crea pausa
 									minutes=(differ.seconds % 3600) // 60
 									hours=differ.days * 24 + differ.seconds // 3600
@@ -2137,7 +2192,7 @@ class MainWindow(BWindow):
 									be_app.WindowAt(0).PostMessage(mx2)
 							elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
-									print("step 1.3")
+									# print("step 1.3")
 									self.listaturni.lv.AddUnder(acc,titm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.CurrentSelection())
 						else:
@@ -2148,7 +2203,7 @@ class MainWindow(BWindow):
 						#Selezionato un superitem
 						itm=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()) #this is the superitem
 						self.listaturni.lv.Expand(itm)
-						print("step 2, selezionato turno")
+						# print("step 2, selezionato turno")
 						cit=self.listaturni.lv.CountItemsUnder(itm,True)
 						if cit>0:
 							#controlla ultima ora di fine
@@ -2157,7 +2212,7 @@ class MainWindow(BWindow):
 							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),acc)
 							if proceed:
 								if differ > datetime.timedelta(minutes=0):
-									print("step 2.2")
+									# print("step 2.2")
 									#prepara BMessage(1001) e crea pausa
 									minutes=(differ.seconds % 3600) // 60
 									hours=differ.days * 24 + differ.seconds // 3600
@@ -2174,7 +2229,7 @@ class MainWindow(BWindow):
 									be_app.WindowAt(0).PostMessage(mx2)
 								elif differ == datetime.timedelta(minutes=0):
 									#aggiungi senza problemi
-									print("step 2.3")
+									# print("step 2.3")
 									self.listaturni.lv.AddUnder(acc,itm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.CurrentSelection()+cit+1)
 							else:
@@ -2189,18 +2244,18 @@ class MainWindow(BWindow):
 					lastit=self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1)
 					titm=self.listaturni.lv.Superitem(lastit)
 					if titm != None:
-						print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
+						# print("step 3, niente selezionato, ultimo oggetto è elemento di turno")
 						#last item is an element, not a superitem
 						cit=self.listaturni.lv.CountItemsUnder(titm,True)
-						print("elementi sotto superitem",cit)
+						# print("elementi sotto superitem",cit)
 						#check if otpf è > di acc.inizio
 						proceed=self.checkpreviouscompatibility(lastit,acc)
-						print("confronto con:")
+						# print("confronto con:")
 						lastit.Details()
 						if proceed:
 							differ=acc.inizio-lastit.fine
 							if differ > datetime.timedelta(minutes=0):
-								print("step 3.1")
+								# print("step 3.1")
 								#aggiungi pausa
 								minutes=(differ.seconds % 3600) // 60
 								hours=differ.days * 24 + differ.seconds // 3600
@@ -2217,7 +2272,7 @@ class MainWindow(BWindow):
 								be_app.WindowAt(0).PostMessage(mx2)
 							elif differ == datetime.timedelta(minutes=0):
 								#agiungi senza prolemi
-								print("step 3.2")
+								# print("step 3.2")
 								self.listaturni.lv.AddUnder(acc,titm)
 								con=self.listaturni.lv.CountItemsUnder(titm,True)
 								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acc),self.listaturni.lv.IndexOf(acc)+con-1)
@@ -2226,7 +2281,7 @@ class MainWindow(BWindow):
 							self.alertWind.append(ask)
 							ask.Go()
 					else:
-						print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
+						# print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
 						self.listaturni.lv.AddUnder(acc,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 			glock=0
 		return BWindow.MessageReceived(self,msg)
@@ -2503,22 +2558,26 @@ class PausItem(BListItem):
 		#	owner.StrokeLine(sp,ep)
 		owner.SetLowColor(255,255,255,255)
 
-class GTreno:
-	def __init__(self,num,orai,stazi,oraf,stazf,fv):
-		self.num = num
-		self.orai=orai
-		self.oraf=oraf
-		self.stazi=stazi
-		self.stazf=stazf
-		self.fv = fv
-class GAcc:
-	def __init__(self,num,orai,stazi,oraf,stazf,fv):
-		self.num = num
-		self.orai=orai
-		self.oraf=oraf
-		self.stazi=stazi
-		self.stazf=stazf
-		self.fv = fv
+# class GTreno:
+	# def __init__(self,num,orai,stazi,oraf,stazf,fv,parte,totale):
+		# self.num = num
+		# self.inizio=orai
+		# self.fine=oraf
+		# self.stp=stazi
+		# self.sta=stazf
+		# self.fv = fv
+		# self.parte = parte
+		# self.totale = totale
+# class GAcc:
+	# def __init__(self,num,orai,stazi,oraf,stazf,fv,parte,totale):
+		# self.num = num
+		# self.inizio=orai
+		# self.fine=oraf
+		# self.stp=stazi
+		# self.sta=stazf
+		# self.fv = fv
+		# self.parte = parte
+		# self.totale = totale
 # class GVett:
 
 class ScrollView:
@@ -2563,13 +2622,13 @@ class App(BApplication):
 				except:
 					#er = None
 					bitul=True
-				print(er)
+				# print(er)
 				#if er is None:
 				if bitul:
-					print("rompo loop")
+					# print("rompo loop")
 					break
 				i+=1
-			print("terminata ricerca refs")
+			# print("terminata ricerca refs")
 		BApplication.RefsReceived(self,msg)
 	def MessageReceived(self,msg):
 		if msg.what == B_SAVE_REQUESTED:
