@@ -114,6 +114,34 @@ class ParteItem(BMenuItem):
 		msg.AddInt8("code",self.name)
 		msg.AddString("name",str(self.name))
 		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
+class Ia(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(666)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
+class It(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(667)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
+class Ft(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(668)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
+class Fa(BMenuItem):
+	def __init__(self,valore):
+		self.name=valore
+		msg=BMessage(669)
+		msg.AddInt8("code",self.name)
+		msg.AddString("name",str(self.name))
+		BMenuItem.__init__(self,str(self.name),msg,str(self.name)[0],0)
 class PartefItem(BMenuItem):
 	def __init__(self,valore):
 		self.name=valore
@@ -226,9 +254,9 @@ class VettWindow(BWindow):
 			for v in {self.ca,self.cp,self.na,self.np}:
 				if v == None:
 					ret = False
-		if ret:
-			if self.parte>self.totale:
-				ret=False
+		#if ret:
+		#	if self.parte>self.totale:
+		#		ret=False
 		return ret
 	def MessageReceived(self, msg):
 		if msg.what==605:
@@ -248,6 +276,7 @@ class VettWindow(BWindow):
 			self.addBtn.SetEnabled(self.checkvalues())
 			#print(self.ca,self.na)
 		elif msg.what == 608:
+			#parte turno inizio giorno
 			self.parte = msg.FindInt8("code")
 			if self.parte> self.totale:
 				self.menutt.FindItem("2").SetMarked(True)
@@ -256,9 +285,11 @@ class VettWindow(BWindow):
 				self.partef=2
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 609:
+			#totale estensione turno in giorni
 			self.totale = msg.FindInt8("code")
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 908:
+			#parte turno fine giorno
 			self.partef = msg.FindInt8("code")
 			if self.partef> self.totale:
 				self.menutt.FindItem("2").SetMarked(True)#.Invoke()
@@ -325,7 +356,7 @@ class VettWindow(BWindow):
 					selitm=lt.ItemAt(lt.CurrentSelection())
 					if type(selitm) != BStringItem:
 						orario=selitm.fine
-						partef=selim.partef
+						partef=selitm.partef
 						sta=selitm.sta
 						doit=True
 				else:
@@ -783,19 +814,50 @@ class TrenoWindow(BWindow):
 		self.menufa.SetDivider(0)
 		self.boxacca.AddChild(self.menufa,None)
 		
-		self.menupt=BMenu("1")
-		self.menupt.SetLabelFromMarked(True)
-		self.menupt.AddItem(ParteItem(1))
-		self.menupt.AddItem(ParteItem(2))
-		self.mfparte = BMenuField(BRect(8, rect.Height()-32-a.Size(),78 , rect.Height()-8), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+78 <-- it's ignored if I write 0 the item is fully visible
-		self.mfparte.SetDivider(a.StringWidth("Parte "))
-		self.bckgnd.AddChild(self.mfparte,None)
+		# self.menupt=BMenu("1")
+		# self.menupt.SetLabelFromMarked(True)
+		# self.menupt.AddItem(ParteItem(1))
+		# self.menupt.AddItem(ParteItem(2))
+		# self.mfparte = BMenuField(BRect(8, rect.Height()-32-a.Size(),78 , rect.Height()-8), 'parte', 'Parte', self.menupt,B_FOLLOW_TOP) #rect.Width()*2/3+78 <-- it's ignored if I write 0 the item is fully visible
+		# self.mfparte.SetDivider(a.StringWidth("Parte "))
+		# self.bckgnd.AddChild(self.mfparte,None)
+		self.menuia=BMenu("1")
+		self.menuia.SetLabelFromMarked(True)
+		self.menuia.AddItem(Ia(1))
+		self.menuia.AddItem(Ia(2))
+		self.mfia = BMenuField(BRect(8, rect.Height()-32-a.Size(),62 , rect.Height()-8), 'inizio_accessori', 'Ia:', self.menuia,B_FOLLOW_TOP)
+		self.mfia.SetDivider(a.StringWidth("Ia: "))
+		self.bckgnd.AddChild(self.mfia,None)
+		
+		self.menuit=BMenu("1")
+		self.menuit.SetLabelFromMarked(True)
+		self.menuit.AddItem(It(1))
+		self.menuit.AddItem(It(2))
+		self.mfit = BMenuField(BRect(66, rect.Height()-32-a.Size(),120 , rect.Height()-8), 'inizio_accessori', 'It:', self.menuit,B_FOLLOW_TOP)
+		self.mfit.SetDivider(a.StringWidth("Ia: "))
+		self.bckgnd.AddChild(self.mfit,None)
+		
+		self.menuft=BMenu("1")
+		self.menuft.SetLabelFromMarked(True)
+		self.menuft.AddItem(Ft(1))
+		self.menuft.AddItem(Ft(2))
+		self.mfft = BMenuField(BRect(124, rect.Height()-32-a.Size(),178 , rect.Height()-8), 'inizio_accessori', 'Ft:', self.menuft,B_FOLLOW_TOP)
+		self.mfft.SetDivider(a.StringWidth("Ft: "))
+		self.bckgnd.AddChild(self.mfft,None)
+		
+		self.menufa=BMenu("1")
+		self.menufa.SetLabelFromMarked(True)
+		self.menufa.AddItem(Fa(1))
+		self.menufa.AddItem(Fa(2))
+		self.mffa = BMenuField(BRect(182, rect.Height()-32-a.Size(),238 , rect.Height()-8), 'inizio_accessori', 'Fa:', self.menufa,B_FOLLOW_TOP)
+		self.mffa.SetDivider(a.StringWidth("Fa: "))
+		self.bckgnd.AddChild(self.mffa,None)
 		
 		self.menutt=BMenu("1")
 		self.menutt.SetLabelFromMarked(True)
 		self.menutt.AddItem(TotaleItem(1))
 		self.menutt.AddItem(TotaleItem(2))
-		self.mftotale = BMenuField(BRect(86, rect.Height()-32-a.Size(), 166, rect.Height()-8), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
+		self.mftotale = BMenuField(BRect(242, rect.Height()-32-a.Size(), 292, rect.Height()-8), 'totale', 'di', self.menutt,B_FOLLOW_TOP)
 		self.mftotale.SetDivider(a.StringWidth("di "))
 		self.bckgnd.AddChild(self.mftotale,None)
 		
@@ -925,6 +987,7 @@ class TrenoWindow(BWindow):
 				ret=False
 		return ret
 	def MessageReceived(self, msg):
+		print(msg.what)
 		if msg.what == 1500:
 			if self.chkaccp.Value()==0:
 				self.boxaccp.Show()
@@ -947,8 +1010,45 @@ class TrenoWindow(BWindow):
 			self.ca = msg.FindString("code")
 			self.na = msg.FindString("name")
 			self.addBtn.SetEnabled(self.checkvalues())
-		elif msg.what == 608:
+		# elif msg.what == 608:
+			# self.parte = msg.FindInt8("code")
+			# self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 666:
 			self.parte = msg.FindInt8("code")
+			self.ina=self.parte
+			if self.ina>1:
+				self.menutt.FindItem("2").SetMarked(True)
+				self.totale = 2
+				self.menuit.FindItem("2").SetMarked(True)
+				self.int=2
+				self.menuft.FindItem("2").SetMarked(True)
+				self.fit=2
+				self.menufa.FindItem("2").SetMarked(True)
+				self.fia=2
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 667:
+			self.int = msg.FindInt8("code")
+			if self.int>1:
+				self.menutt.FindItem("2").SetMarked(True)
+				self.totale = 2
+				self.menuft.FindItem("2").SetMarked(True)
+				self.fit=2
+				self.menufa.FindItem("2").SetMarked(True)
+				self.fia=2
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 668:
+			self.fit = msg.FindInt8("code")
+			if self.fit>1:
+				self.menutt.FindItem("2").SetMarked(True)
+				self.totale = 2
+				self.menufa.FindItem("2").SetMarked(True)
+				self.fia=2
+			self.addBtn.SetEnabled(self.checkvalues())
+		elif msg.what == 669:
+			self.fia = msg.FindInt8("code")
+			if self.fia>1:
+				self.menutt.FindItem("2").SetMarked(True)
+				self.totale = 2
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 609:
 			self.totale = msg.FindInt8("code")
@@ -1805,10 +1905,10 @@ class MainWindow(BWindow):
 		#aggiungi pausa
 			dm=msg.FindInt8("deltam")
 			do=msg.FindInt8("deltao")
-			parte=msg.FindInt8("parte")
-			partef=msg.FindInt8("partef")
-			totale=msg.FindInt8("totale")
-			parteturno=(parte,partef,totale)
+			#parte=msg.FindInt8("parte")
+			#partef=msg.FindInt8("partef")
+			#totale=msg.FindInt8("totale")
+			#parteturno=(parte,partef,totale)
 			dt = datetime.timedelta(hours=do,minutes=dm)
 			n=msg.FindString("name")
 			if self.listaturni.lv.CountItems()>0:
@@ -1826,8 +1926,18 @@ class MainWindow(BWindow):
 							self.listaturni.lv.Expand(selit)
 							lastund=self.listaturni.lv.ItemUnderAt(selit,True,it-1)
 							i=lastund.fine #(or it-1)
+							parte=lastund.partef
+							if i+dt>datetime.timedelta(hours=24):
+								partef=2
+								totale=2
+							else:
+								partef=1
+								totale=lastund.totale
+							if parte>1:
+								partef=2
+							parteturno=(parte,partef,totale)
 							sta=lastund.sta
-							pau=PausItem(n,i,dt,sta)#,parteturno)
+							pau=PausItem(n,i,dt,sta,parteturno)
 							self.tmpElem.append(pau)
 							self.listaturni.lv.AddUnder(pau,selit)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
@@ -1835,7 +1945,17 @@ class MainWindow(BWindow):
 						#è un elemento
 						i=selit.fine
 						sta=selit.sta
-						pau=PausItem(n,i,dt,sta)#,parteturno)
+						parte=selit.partef
+						if selit.fine+dt>datetime.timedelta(hours=24):
+							partef=2
+							totale=2
+						else:
+							partef=1
+							totale=selit.totale
+						if parte>1:
+							partef=2
+						parteturno=(parte,partef,totale)
+						pau=PausItem(n,i,dt,sta,parteturno)
 						self.tmpElem.append(pau)
 						supit=self.listaturni.lv.Superitem(selit)
 						self.listaturni.lv.AddUnder(pau,supit)
@@ -1854,7 +1974,18 @@ class MainWindow(BWindow):
 							#posso aggiungere perché è presente un rigo del turno
 							i=self.listaturni.lv.ItemUnderAt(litm,True,it-1).fine
 							sta=self.listaturni.lv.ItemUnderAt(litm,True,it-1).sta
-							pau=PausItem(n,i,dt,sta)#,parteturno)
+							parte=self.listaturni.lv.ItemUnderAt(litm,True,it-1).partef
+							#totale=self.listaturni.lv.ItemUnderAt(litm,True,it-1).totale
+							if i+dt>datetime.timedelta(hours=24):
+								partef=2
+								totale=2
+							else:
+								partef=1
+								totale=self.listaturni.lv.ItemUnderAt(litm,True,it-1).totale
+							if parte>1:
+								partef=2
+							parteturno=(parte,partef,totale)
+							pau=PausItem(n,i,dt,sta,parteturno)
 							self.tmpElem.append(pau)
 							self.listaturni.lv.AddUnder(pau,litm)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
@@ -1863,7 +1994,17 @@ class MainWindow(BWindow):
 					else:
 						i=litm.fine
 						sta=litm.sta
-						pau=PausItem(n,i,dt,sta)#,parteturno)
+						parte=litm.partef
+						if litm.fine+dt>datetime.timedelta(hours=24):
+							partef=2
+							totale=2
+						else:
+							partef=1
+							totale=litm.totale
+						if parte>1:
+							partef=2
+						parteturno=(parte,partef,totale)
+						pau=PausItem(n,i,dt,sta,parteturno)
 						self.tmpElem.append(pau)
 						titm=self.listaturni.lv.Superitem(litm)
 						self.listaturni.lv.AddUnder(pau,titm)
@@ -1976,7 +2117,11 @@ class MainWindow(BWindow):
 									selit = itm
 									i=selit.fine
 									sta=selit.sta
-									pau=PausItem("Pausa",i,dt,sta)#,(parte,totale))
+									partep=selit.partef
+									totalep=selit.totale
+									if parte>1:
+										partefp=2
+									pau=PausItem("Pausa",i,dt,sta,(partep,partefp,totalep))
 									self.tmpElem.append(pau)
 									supit=self.listaturni.lv.Superitem(selit)
 									self.listaturni.lv.AddUnder(pau,supit)
@@ -1996,7 +2141,11 @@ class MainWindow(BWindow):
 									selit = itm
 									i=selit.fine
 									sta=selit.sta
-									pau=PausItem("Pausa",i,dt,sta)#,(parte,totale))
+									partep=selit.partef
+									totalep=selit.totale
+									if parte>1:
+										partefp=2
+									pau=PausItem("Pausa",i,dt,sta,(partep,partefp,totalep))
 									self.tmpElem.append(pau)
 									supit=self.listaturni.lv.Superitem(selit)
 									self.listaturni.lv.AddUnder(pau,supit)
@@ -2055,7 +2204,11 @@ class MainWindow(BWindow):
 									lastund=self.listaturni.lv.ItemUnderAt(selit,True,cit-1)
 									i=lastund.fine #(or it-1)
 									sta=lastund.sta
-									pau=PausItem("Pausa",i,dt,sta)#,(parte,totale))
+									partep=lastund.partef
+									totalep=lastund.totale
+									if parte>1:
+										partefp=2
+									pau=PausItem("Pausa",i,dt,sta,(partep,partefp,totalep))
 									self.tmpElem.append(pau)
 									self.listaturni.lv.AddUnder(pau,selit)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.IndexOf(lastund))
@@ -2096,6 +2249,10 @@ class MainWindow(BWindow):
 						cit=self.listaturni.lv.CountItemsUnder(titm,True)
 						i= lastit.fine
 						sta=lastit.sta
+						partep=lastit.partef
+						totalep=lastit.totale
+						if parte>1:
+							partefp=2
 						#last item is an element, not a superitem
 						if ap:
 							differ = dtpp - i
@@ -2111,7 +2268,7 @@ class MainWindow(BWindow):
 								return
 						else:
 							if differ > datetime.timedelta(minutes=0):
-								pau=PausItem("Pausa",i,dt,sta)#,(parte,totale))
+								pau=PausItem("Pausa",i,dt,sta,(partep,partefp,totalep))
 								self.tmpElem.append(pau)
 								self.listaturni.lv.AddUnder(pau,titm)
 								self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(pau),self.listaturni.lv.CountItems()-1)
@@ -2170,7 +2327,13 @@ class MainWindow(BWindow):
 					if titm != None: 
 					#esiste superitem ovvero sono un elemento del turno
 						# print("step 1, selezionato elemento di turno")
-						differ = dtp - itm.fine
+						print(vet.parte,itm.partef)
+						if vet.parte>itm.partef:
+							print("giorno dopo")
+							differ=dtp+datetime.timedelta(hours=24)-itm.fine
+						else:
+							print("stesso giorno")
+							differ = dtp - itm.fine
 						######################################################################################
 						if self.checkpreviouscompatibility(itm,vet): #TODO: controllare se parte attuale è maggiore di partef item precedente
 							if differ > datetime.timedelta(minutes=0):
@@ -2194,7 +2357,7 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddUnder(vet,titm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection())
 						else:
-							ask=BAlert('cle', "Mancata corrispondenza ora partenza vettura e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+							ask=BAlert('cle', "1 Mancata corrispondenza ora partenza vettura e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 							self.alertWind.append(ask)
 							ask.Go()				
 					else:
@@ -2206,7 +2369,13 @@ class MainWindow(BWindow):
 						if cit>0:
 							#controlla ultima ora di fine
 							otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).fine
-							differ = dtp - otpf
+							print(vet.parte,self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).partef)
+							if vet.parte>self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).partef:
+								print("giorno dopo")
+								differ=dtp+datetime.timedelta(hours=24)-otpf
+							else:
+								print("stesso giorno")
+								differ = dtp - otpf
 							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),vet)
 							if proceed:
 								if differ > datetime.timedelta(minutes=0):
@@ -2231,7 +2400,7 @@ class MainWindow(BWindow):
 									self.listaturni.lv.AddUnder(vet,itm)
 									self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.CurrentSelection()+cit+1)
 							else:
-								ask=BAlert('cle', "Mancata corrispondenza ora partenza vettura e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+								ask=BAlert('cle', "2 Mancata corrispondenza ora partenza vettura e rigo precedente", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 								self.alertWind.append(ask)
 								ask.Go()
 						else:
@@ -2248,7 +2417,13 @@ class MainWindow(BWindow):
 						#check if otpf è > di vet.inizio
 						proceed=self.checkpreviouscompatibility(lastit,vet)
 						if proceed:
-							differ=vet.inizio-lastit.fine
+							print(vet.parte,lastit.partef)
+							if vet.parte>lastit.partef:
+								print("giorno dopo")
+								differ=vet.inizio+datetime.timedelta(hours=24)-lastit.fine
+							else:
+								print("stesso giorno")
+								differ=vet.inizio-lastit.fine
 							if differ > datetime.timedelta(minutes=0):
 								# print("step 3.1")
 								#aggiungi pausa
@@ -2433,7 +2608,7 @@ class MainWindow(BWindow):
 		sta=(cmd[4],nsta)
 		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
 		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
-		return VettItem(cmd[0],i,f,stp,sta,(cmd[5],cmd[6]))
+		return VettItem(cmd[0],i,f,stp,sta,(cmd[5],cmd[6],cmd[7]))
 	def estrai_acc(self,s):
 		cmd=s.split("·")
 		ta=(cmd[0],cmd[1])
@@ -2448,7 +2623,7 @@ class MainWindow(BWindow):
 				nsta=stz[1]
 		stp=(cmd[5],nstp)
 		sta=(cmd[6],nsta)
-		return AccItem(ta,cmd[2],i,f,stp,sta,cmd[7],(cmd[8],cmd[9]))
+		return AccItem(ta,cmd[2],i,f,stp,sta,cmd[7],(cmd[8],cmd[9],cmd[10]))
 	def estrai_trn(self,s):
 		cmd=s.split("·")
 		hmp=cmd[1].split(":")
@@ -2466,7 +2641,7 @@ class MainWindow(BWindow):
 			if cond[1]==int(cmd[5]):
 				rcond=(cond[0],cond[1])
 				break
-		return TrenoItem(cmd[0],i,f,stp,sta,rcond,cmd[6],(cmd[7],cmd[8]))
+		return TrenoItem(cmd[0],i,f,stp,sta,rcond,cmd[6],(cmd[7],cmd[8],cmd[9]))
 	def estrai_pau(self,s):
 		cmd=s.split("·")
 		hmp=cmd[1].split(":")
@@ -2479,12 +2654,13 @@ class MainWindow(BWindow):
 		i=datetime.timedelta(hours=int(hmp[0]),minutes=int(hmp[1]))
 		f=datetime.timedelta(hours=int(hma[0]),minutes=int(hma[1]))
 		dt=f-i
-		return PausItem(cmd[0],i,dt,stp)#,(cmd[4],cmd[5]))
+		return PausItem(cmd[0],i,dt,stp,(cmd[4],cmd[5],cmd[6]))
 		
 	def checkpreviouscompatibility(self,prev,ittem):
 		ret = True
-		if prev.fine>ittem.inizio:
-			ret=False
+		if ittem.parte<=prev.partef:
+			if prev.fine>ittem.inizio:
+				ret=False
 		return ret
 	def QuitRequested(self):
 		wnum = be_app.CountWindows()
@@ -2651,17 +2827,20 @@ class VettItem(BListItem):
 		owner.MovePenTo(frame.left+700,frame.bottom-self.font_height_value.descent)
 		owner.DrawString(str(self.parte)+"/"+str(self.totale),None)
 class PausItem(BListItem):
-	def __init__(self,name,inizio,deltat,dove):#,parteturno):
+	def __init__(self,name,inizio,deltat,dove,parteturno):
 		self.name=name
 		fon=BFont()
 		self.stp=dove
 		self.sta=dove
-		#self.parte=parteturno[0]
-		#self.totale=parteturno[2]
-		#self.partef=parteturno[1]
-		self.parte=1
-		self.totale=1
-		self.partef=1
+		self.parte=parteturno[0]
+		self.totale=parteturno[2]
+		self.partef=parteturno[1]
+		if self.parte==None:
+			self.parte=1
+		if self.totale==None:
+			self.totale=1
+		if self.partef==None:
+			self.partef=1
 		#todo: recuperare parteturno rigo precedente se 2 assegnarlo a quello attuale
 		self.font_height_value=font_height()
 		fon.GetHeight(self.font_height_value)
