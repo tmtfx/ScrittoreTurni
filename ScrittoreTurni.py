@@ -764,14 +764,14 @@ class TrenoWindow(BWindow):
 	ccond=0
 	ncond=None
 	ina=1
-	int=1
-	fit=1
+	#int=1
+	#fit=1
 	fia=1
 	#pia=1
 	#pt=1
 	#pfa=1
-	#parte=1
-	#partef=1
+	parte=1
+	partef=1
 	totale=1
 	tipoaccp=[("Accessori in partenza",1),("Cambio volante in partenza",3),("Parking in partenza",5)]
 	tipoacca=[("Accessori in arrivo",2),("Cambio volante in arrivo",4),("Parking in arrivo",6),("Cambio banco",7)]
@@ -1020,25 +1020,25 @@ class TrenoWindow(BWindow):
 				self.menutt.FindItem("2").SetMarked(True)
 				self.totale = 2
 				self.menuit.FindItem("2").SetMarked(True)
-				self.int=2
+				self.parte=2
 				self.menuft.FindItem("2").SetMarked(True)
-				self.fit=2
+				self.partef=2
 				self.menufa.FindItem("2").SetMarked(True)
 				self.fia=2
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 667:
-			self.int = msg.FindInt8("code")
-			if self.int>1:
+			self.parte = msg.FindInt8("code")
+			if self.parte>1:
 				self.menutt.FindItem("2").SetMarked(True)
 				self.totale = 2
 				self.menuft.FindItem("2").SetMarked(True)
-				self.fit=2
+				self.partef=2
 				self.menufa.FindItem("2").SetMarked(True)
 				self.fia=2
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 668:
-			self.fit = msg.FindInt8("code")
-			if self.fit>1:
+			self.partef = msg.FindInt8("code")
+			if self.partef>1:
 				self.menutt.FindItem("2").SetMarked(True)
 				self.totale = 2
 				self.menufa.FindItem("2").SetMarked(True)
@@ -1076,7 +1076,22 @@ class TrenoWindow(BWindow):
 					elif self.codaccp == 5:
 						#usa prkp
 						delt=datetime.timedelta(minutes=self.prkp)
-					dtout=datoi-delt
+					if datoi-delt<datetime.timedelta(minutes=0):
+						if self.ina == 2:
+							print("non dovrebbe succedere: siamo già nella seconda parte del turno, l'accessorio non può trovarsi ora nella prima parte del turno")
+						else:
+							if self.parte == 1:
+								self.parte = 2
+								self.menuit.FindItem("2").SetMarked(True)
+								self.totale = 2
+								self.menuft.FindItem("2").SetMarked(True)
+								self.fia = 2
+								self.menufa.FindItem("2").SetMarked(True)
+								self.totale = 2
+								self.menutt.FindItem("2").SetMarked(True)
+							dtout=datoi+datetime.timedelta(hours=24)-delt
+					else:
+						dtout=datoi-delt
 					self.mip.SetText(str((dtout.seconds % 3600) // 60))
 					self.oip.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
 			if self.chkacca.Value()==0:
@@ -2064,6 +2079,7 @@ class MainWindow(BWindow):
 			materiale=msg.FindString("materiale")
 			n=msg.FindString("name")
 			parte=msg.FindInt8("parte")
+			partef=msg.Findint8("partef")
 			totale=msg.FindInt8("totale")
 			codaccp=msg.FindInt8("codaccp")
 			codacca=msg.FindInt8("codacca")
@@ -2077,14 +2093,14 @@ class MainWindow(BWindow):
 			if ntap!=None:
 				dtpp = datetime.timedelta(hours=oip,minutes=mip)
 				ap=True
-				accp=AccItem((ntap,codaccp),n,dtpp,dtp,(cspp,nspp),(cspp,nspp),materiale,(parte,totale))
+				accp=AccItem((ntap,codaccp),n,dtpp,dtp,(cspp,nspp),(cspp,nspp),materiale,(parte,parte,totale)) #cambiare parte/partef
 				self.tmpElem.append(accp)
 			aa=False
 			if ntaa!=None:
 				# print(ntaa,ofa,mfa)	
 				dtaa = datetime.timedelta(hours=ofa,minutes=mfa)
 				aa=True
-				acca=AccItem((ntaa,codacca),n,dta,dtaa,(csaa,nsaa),(csaa,nsaa),materiale,(parte,totale))
+				acca=AccItem((ntaa,codacca),n,dta,dtaa,(csaa,nsaa),(csaa,nsaa),materiale,(partef,partef,totale)) #cambiare parte/partef
 				self.tmpElem.append(acca)
 			
 			
@@ -2483,7 +2499,12 @@ class MainWindow(BWindow):
 					if titm != None: 
 					#esiste superitem ovvero sono un elemento del turno
 						# print("step 1, selezionato elemento di turno")
-						differ = dtp - itm.fine
+						if acc.parte>itm.partef:
+							print("giorno dopo")
+							differ=dtp+datetime.timedelta(hours=24)-itm.fine
+						else:
+							print("stesso giorno")
+							differ = dtp - itm.fine
 						if self.checkpreviouscompatibility(itm,acc):
 							if differ > datetime.timedelta(minutes=0):
 									# print("step 1.2")
@@ -2518,7 +2539,12 @@ class MainWindow(BWindow):
 						if cit>0:
 							#controlla ultima ora di fine
 							otpf=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit).fine
-							differ = dtp - otpf
+							if acc.parte>itm.partef:
+								print("giorno dopo")
+								differ=dtp+datetime.timedelta(hours=24)-otpf
+							else:
+								print("stesso giorno")
+								differ = dtp - otpf
 							proceed=self.checkpreviouscompatibility(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()+cit),acc)
 							if proceed:
 								if differ > datetime.timedelta(minutes=0):
@@ -2561,9 +2587,14 @@ class MainWindow(BWindow):
 						#check if otpf è > di acc.inizio
 						proceed=self.checkpreviouscompatibility(lastit,acc)
 						# print("confronto con:")
-						lastit.Details()
+						#lastit.Details()
 						if proceed:
-							differ=acc.inizio-lastit.fine
+							if acc.parte>itm.partef:
+								print("giorno dopo")
+								differ=acc.inizio+datetime.timedelta(hours=24)-lastit.fine
+							else:
+								print("stesso giorno")
+								differ=acc.inizio-lastit.fine
 							if differ > datetime.timedelta(minutes=0):
 								# print("step 3.1")
 								#aggiungi pausa
