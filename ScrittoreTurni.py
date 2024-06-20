@@ -967,24 +967,29 @@ class TrenoWindow(BWindow):
 			if self.parte>self.totale:
 				# print("la parte è superiore al totale")
 				ret=False
+			
 			dtit=datetime.timedelta(hours=int(self.oit.Text()),minutes=int(self.mit.Text()))
 			dtft=datetime.timedelta(hours=int(self.oft.Text()),minutes=int(self.mft.Text()))
 			if dtit>=dtft:
-				# print("l'ora di partenza è successiva all'ora di arrivo")
-				ret=False
+				if self.partef==self.parte:
+					# print("l'ora di partenza è successiva all'ora di arrivo")
+					ret=False
 			if self.chkaccp.Value()==0:
 				dtap=datetime.timedelta(hours=int(self.oip.Text()),minutes=int(self.mip.Text()))
 				if dtap>dtit:
-					# print("l'ora di inizio accessori in partenza è successiva all'ora di partenza")
-					ret=False
+					if self.parte==self.ina:
+						# print("l'ora di inizio accessori in partenza è successiva all'ora di partenza")
+						ret=False
 			if self.chkacca.Value()==0:
 				dtaa=datetime.timedelta(hours=int(self.ofa.Text()),minutes=int(self.mfa.Text()))
 				if dtaa<dtft:
-					# print("l'ora di fine accessori in arrivo è antecedente all'orario di arrivo")
-					ret=False
+					if self.fia==self.partef:
+						# print("l'ora di fine accessori in arrivo è antecedente all'orario di arrivo")
+						ret=False
 			if self.ccond == 0:
 				# print("non è stato selezionato un modulo di condotta")
 				ret=False
+		print(ret)
 		return ret
 	def MessageReceived(self, msg):
 		print(msg.what)
@@ -1058,6 +1063,7 @@ class TrenoWindow(BWindow):
 			self.ncond=msg.FindString("name")
 			self.addBtn.SetEnabled(self.checkvalues())
 		elif msg.what == 610:
+			#selezione materiale
 			self.accp=msg.FindInt8("accp")
 			self.acca=msg.FindInt8("acca")
 			self.prkp=msg.FindInt8("prkp")
@@ -1108,8 +1114,17 @@ class TrenoWindow(BWindow):
 						delt=datetime.timedelta(minutes=self.prka)
 					elif self.codacca == 7:
 						#cambio banco
-						delt=datetime.timedelta(minutes=self.cb)
+						delt=datetime.timedelta(minutes=self.cb) #TODO verificare se va su giornosucessivo
 					dtout=datoi+delt
+					if dtout>datetime.timedelta(hours=23,minutes=59):
+						if self.partef < 2:
+							dtout=dtout-datetime.timedelta(hours=24)
+							self.fia=2
+							self.menufa.FindItem("2").SetMarked(True)
+							self.totale = 2
+							self.menutt.FindItem("2").SetMarked(True)
+						else:
+							print("errore il turno non si può sviluppare su 3 giorni")
 					self.mfa.SetText(str((dtout.seconds % 3600) // 60))
 					self.ofa.SetText(str(dtout.days * 24 + dtout.seconds // 3600))
 			self.addBtn.SetEnabled(self.checkvalues())
