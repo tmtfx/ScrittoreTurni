@@ -1565,6 +1565,8 @@ class MainWindow(BWindow):
 	tmpWind=[]
 	tmpElem=[]
 	alertWind=[]
+	ntreni = []
+	vett_comandate = []
 	Menus = (
 		('File', ((1, 'Carica turno'),(2, 'Salva turno'),(3, 'Distruggi turni'),(None, None),(int(AppDefs.B_QUIT_REQUESTED), 'Esci'))),('Aggiungi', ((4, 'Accessori'),(5, 'Vettura'),(6, 'Treno'),(7, 'Pausa'))),('Elaborazione', ((10, 'Estrai treni'),(11, 'Componi treni-acc'),(42, 'Crea giornate'))),
 		('Aiuto', ((8, 'Judimi'),(23, 'Informazioni')))
@@ -1676,9 +1678,6 @@ class MainWindow(BWindow):
 				self.acc_window.Show()
 		elif msg.what == 10:
 		#estrai treni
-			ntreni = []
-			#treni = []
-			vett_comandate = []
 			for og in self.listaturni.lv.Items():
 				if type(og)!=BStringItem:
 					if type(og)!=VettItem and type(og)!=PausItem:
@@ -1690,13 +1689,13 @@ class MainWindow(BWindow):
 							#	num=0
 							num=int(og.name)
 							go=True
-							for x in ntreni: #controllo se esiste già in ntreni
+							for x in self.ntreni: #controllo se esiste già in ntreni
 								if x[0]==num:
 									go=False
 									break
 							if go:
 								#il treno non è in ntreni
-								ntreni.append((num,[]))
+								self.ntreni.append((num,[]))
 								if type(og) == TrenoItem:
 									#print(self.listaturni.lv.Superitem(og).Text())
 									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
@@ -1706,13 +1705,13 @@ class MainWindow(BWindow):
 									#print(self.listaturni.lv.Superitem(og).Text())
 									#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),og.int(totale))
 									oggetto=og
-								ntreni[-1][1].append(oggetto)
+								self.ntreni[-1][1].append(oggetto)
 							#elif type(og) == VettItem:
 							#	oggetto=GVett(
 							
 							else:
 								#il treno esiste in ntreni
-								match=[x for x in ntreni if x[0] == num]
+								match=[x for x in self.ntreni if x[0] == num]
 								if type(og) == TrenoItem:
 									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
 									##match[0][1].append(oggetto)
@@ -1730,8 +1729,10 @@ class MainWindow(BWindow):
 					else:
 						#gestiamo VettItems o PausItems #TODO
 						pass
-			#print(ntreni)
-			for x in ntreni:
+			#print(ntreni
+		elif msg.what == 11:
+			#if len(self.ntreni)>0:
+			for x in self.ntreni:
 				lowgacc=(datetime.timedelta(hours=23,minutes=59),(None,None),2,0)#1 è parte turno, esempio. se accessori iniziano alle 23.50, ma il cambio volante inizia alle 00:10 i primi tempi accessori sono 23:50
 				lowgtrenot=datetime.timedelta(hours=23,minutes=59)
 				#lowgaccn=x[0]
@@ -1793,38 +1794,18 @@ class MainWindow(BWindow):
 				if self.listaturni.lv.CurrentSelection()>-1:
 					sel=self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection())
 					if type(sel)==BStringItem:
-						#print("it is a superitem",sel.Text())
-						#è un superitem
-						for el in self.listaturni.lv.Items():
-							if type(el) == BStringItem:
-								self.listaturni.lv.Collapse(el)
-						indt=0
-						iout=0
-						while indt<self.listaturni.lv.CountItems():
-							i=self.listaturni.lv.ItemAt(indt)
-							if type(i) == BStringItem:
-								iout+=1
-								iout+=self.listaturni.lv.CountItemsUnder(i,True)
-								if i.Text()==sel.Text():
-									self.listaturni.lv.AddItem(BStringItem(self.turno.Text()),iout)
-									break
-							indt+=1
+						isel=self.listaturni.lv.IndexOf(sel)
+						iund=self.listaturni.lv.CountItemsUnder(sel,True)
+						bli=BStringItem(self.turno.Text())
+						self.listaturni.lv.AddItem(bli)
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(bli),isel+iund+1)
 					else:
-						#print("looking for its superitem")
-						#cerca suo superitem
 						supersel=self.listaturni.lv.Superitem(sel)
-						#collassa tutto e seleziona supersel
-						for el in self.listaturni.lv.Items():
-							if type(el) == BStringItem:
-								self.listaturni.lv.Collapse(el)
-						indt=0
-						for i in self.listaturni.lv.Items():
-							indt+=1
-							if type(i) == BStringItem:
-								indt+=self.listaturni.lv.CountItemsUnder(i,True)
-								if i.Text()==supersel.Text():
-									self.listaturni.lv.AddItem(BStringItem(self.turno.Text()),indt)
-									break
+						isupsel=self.listaturni.lv.IndexOf(supersel)
+						iund=self.listaturni.lv.CountItemsUnder(supersel,True)
+						bli=BStringItem(self.turno.Text())
+						self.listaturni.lv.AddItem(bli)
+						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(bli),isupsel+iund+1)
 				else:
 					bli=BStringItem(self.turno.Text())
 					self.listaturni.lv.AddItem(bli)
@@ -1921,13 +1902,13 @@ class MainWindow(BWindow):
 						txt="@"+ita.Text()+"\n"
 					elif type(ita)==PausItem:
 						#delta=ita.fine-ita.inizio
-						txt="?"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
+						txt="?"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.partef)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==AccItem:
-						txt="§"+ita.nta+"·"+str(ita.cta)+"·"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
+						txt="§"+ita.nta+"·"+str(ita.cta)+"·"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.partef)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==TrenoItem:
-						txt="&"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.ccond)+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
+						txt="&"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.ccond)+"·"+ita.materiale+"·"+str(ita.parte)+"·"+str(ita.partef)+"·"+str(ita.totale)+"\n"
 					elif type(ita)==VettItem:
-						txt="#"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.totale)+"\n"
+						txt="#"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.partef)+"·"+str(ita.totale)+"\n"
 					i+=1
 					myfile.write(txt)
 		elif msg.what == 1001:
