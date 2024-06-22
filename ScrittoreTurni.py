@@ -1696,30 +1696,31 @@ class MainWindow(BWindow):
 							if go:
 								#il treno non è in ntreni
 								self.ntreni.append((num,[]))
-								if type(og) == TrenoItem:
-									#print(self.listaturni.lv.Superitem(og).Text())
-									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-									#ntreni[-1][1].append(oggetto)
-									oggetto=og
-								elif type(og) == AccItem:
-									#print(self.listaturni.lv.Superitem(og).Text())
-									#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),og.int(totale))
-									oggetto=og
-								self.ntreni[-1][1].append(oggetto)
+								#if type(og) == TrenoItem:
+								#	#print(self.listaturni.lv.Superitem(og).Text())
+								#	#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
+								#	#ntreni[-1][1].append(oggetto)
+								#	oggetto=og
+								#elif type(og) == AccItem:
+								#	#print(self.listaturni.lv.Superitem(og).Text())
+								#	#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),og.int(totale))
+								#	oggetto=og
+								self.ntreni[-1][1].append(og)#getto)
 							#elif type(og) == VettItem:
 							#	oggetto=GVett(
 							
 							else:
 								#il treno esiste in ntreni
 								match=[x for x in self.ntreni if x[0] == num]
-								if type(og) == TrenoItem:
-									#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-									##match[0][1].append(oggetto)
-									oggetto = og
-								elif type(og) == AccItem:
-									#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-									oggetto = og
-								match[0][1].append(oggetto)
+								#if type(og) == TrenoItem:
+								#	#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
+								#	##match[0][1].append(oggetto)
+								#	oggetto = og
+								#elif type(og) == AccItem:
+								#	#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
+								#	oggetto = og
+								#match[0][1].append(oggetto)
+								match[0][1].append(og)
 						except:
 						#	print(og.label)
 						#	#si tratta di Riserva #TODO
@@ -1729,43 +1730,85 @@ class MainWindow(BWindow):
 					else:
 						#gestiamo VettItems o PausItems #TODO
 						pass
-			#print(ntreni
+			#print(ntreni)
 		elif msg.what == 11:
 			#if len(self.ntreni)>0:
 			for x in self.ntreni:
-				lowgacc=(datetime.timedelta(hours=23,minutes=59),(None,None),2,0)#1 è parte turno, esempio. se accessori iniziano alle 23.50, ma il cambio volante inizia alle 00:10 i primi tempi accessori sono 23:50
-				lowgtrenot=datetime.timedelta(hours=23,minutes=59)
+				#lowgacc=(datetime.timedelta(hours=23,minutes=59),(None,None),2,0)#2 è parte turno, esempio. se accessori iniziano alle 23.50, ma il cambio volante inizia alle 00:10 i primi tempi accessori sono 23:50
+				#lowgtrenot=datetime.timedelta(hours=23,minutes=59)
 				#lowgaccn=x[0]
-				highgacc=(datetime.timedelta(hours=0,minutes=0),(None,None),1,0)
-				hightrenot=datetime.timedelta(hours=0,minutes=0)
-				trno=(datetime.timedelta(hours=23,minutes=59),(None,None),datetime.timedelta(hours=23,minutes=59),(None,None),2,1,0)
+				#highgacc=(datetime.timedelta(hours=0,minutes=0),(None,None),1,0)
+				#hightrenot=datetime.timedelta(hours=0,minutes=0)
+				#trno=(datetime.timedelta(hours=23,minutes=59),(None,None),datetime.timedelta(hours=23,minutes=59),(None,None),2,1,0)
 				outp=None
 				outa=None
+				outt=[]
+				
 				for y in x[1]:
 					if type(y)==AccItem:
 						if int(y.codacc) in [ 1, 3, 5 ]: #se è un accessorio in partenza
-							if int(y.parte) < lowgacc[2]:
-								lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							if outp==None:
 								outp=y
 							else:
-								if y.inizio<=lowgacc[0]:
-									lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
-									outp=y
+								if y.inizio < outp.inizio:
+									#controlla che il delta tra i due accessori non sia esagerato
+									#potrebbe indicare un accessorio a cavallo tra due giorni
+									dlt=outp.inizio-y.inizio
+									if dlt<datetime.timedelta(hours=8,minutes=0):
+										outp=y
+									else:
+										print("potrebbe essere un accessorio a cavallo di due giorni, pertanto questo accessorio è successivo a quello già in memoria")
+								else:
+									print("controllo se y.inizio è nel giorno precedente")
+									if outp.inizio + datetime.timedelta(hours=24, minutes=0)-y.inizio<datetime.timedelta(hours=8,minutes=0):
+										print("potrebbe essere un accessorio a cavallo di due giorni")
+										outp=y
+							#if int(y.parte) < lowgacc[2]:
+							#	lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							#	outp=y
+							#else:
+							#	if y.inizio<=lowgacc[0]:
+							#		lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							#		outp=y
 						elif int(y.codacc) in [ 2,4,6,7 ]:
-							if int(y.parte) > highgacc[2]:
-								highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							if outa==None:
 								outa=y
 							else:
-								if y.fine>=highgacc[0]:
-									highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
-									outa=y
-					#elif type(y)==TrenoItem:
-						
+								if y.fine>outa.fine:
+									#controlla che il delta non sia esagerato perché altrimenti potrebbe indicare
+									# che l'accessorio in arrivo si sviluppi su più giorni
+									dlt=y.fine-outa.fine
+									if dlt<datetime.timedelta(hours=8)
+										outa=y
+									else:
+										print("potrebbe essere un accessorio a cavallo di giornata, pertanto mantengo quello vecchio che casca il giorno successivo")
+								else:
+									print("controllo se y.fine è nel giorno successivo")
+									if y.fine+datetime.timedelta(hours=24)-outa.fine<datetime.timedelta(hours=8,minutes=0):
+										print("potrebbe essere un accessorio a cavallo di due giorni")
+										outa=y
+							#if int(y.parte) > highgacc[2]:
+							#	highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							#	outa=y
+							#else:
+							#	if y.fine>=highgacc[0]:
+							#		highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
+							#		outa=y
+					elif type(y)==TrenoItem:
+						for item in outt:
+							if (item.inizio == y.inizio) and ( item.fine == y.fine ):
+								print("elemento già inserito")
+								pass
+							else:
+								outt.append(y)
+				
+				outt.sort(key=lambda x: x.inizio)
+				def_outt = self.unisci_condotte(outt)
 				#TODO: se un lowgacc non ha un corrispettivo di treno o di highgacc bisogna far risultare accessorio ultimo di partenza (magari parte un triestino o un veneziano)
 				if outp!=None:
-					print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
+					#print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
 				if outa!=None:
-					print("Orario ultimo accessorio in arrivo di",x[0],":",highgacc[0],highgacc[1][0])#,highgacc[2],outa)
+					#print("Orario ultimo accessorio in arrivo di",x[0],":",highgacc[0],highgacc[1][0])#,highgacc[2],outa)
 		elif msg.what == 1020:
 		#deseleziona listview
 			self.listaturni.lv.DeselectAll()
@@ -2622,6 +2665,22 @@ class MainWindow(BWindow):
 						self.listaturni.lv.AddUnder(acc,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
 			glock=0
 		return BWindow.MessageReceived(self,msg)
+	def unisci_condotte(self,outt):
+		i=0
+		o=len(outt)
+		if len(outt)>1:
+			while i<o:
+				z=i+1
+				while z+i<o:
+					if outt[i].fine == outt[z].inizio:
+						mergethem(outt[i],outt[z]) #unisce i due elementi creandone uno nuovo, poi lo mette al posto di outt[i] (sostituendolo)
+						o=len(outt)
+					elif (outt[z].inizio-outt[i].fine<datetime.timedelta(minutes=15)) and (outt[z].stp == outt[i].sta):
+						mergethem(outt[i],outt[z])
+						o=len(outt)
+					z+=1
+				i+=1
+		return outt
 	def estrai_vett(self,s):
 		cmd=s.split("·")
 		hmp=cmd[1].split(":")
@@ -2910,28 +2969,6 @@ class PausItem(BListItem):
 		#	ep=BPoint(frame.right-3,frame.bottom-(frame.bottom-frame.top)/2)
 		#	owner.StrokeLine(sp,ep)
 		owner.SetLowColor(255,255,255,255)
-
-# class GTreno:
-	# def __init__(self,num,orai,stazi,oraf,stazf,fv,parte,totale):
-		# self.num = num
-		# self.inizio=orai
-		# self.fine=oraf
-		# self.stp=stazi
-		# self.sta=stazf
-		# self.fv = fv
-		# self.parte = parte
-		# self.totale = totale
-# class GAcc:
-	# def __init__(self,num,orai,stazi,oraf,stazf,fv,parte,totale):
-		# self.num = num
-		# self.inizio=orai
-		# self.fine=oraf
-		# self.stp=stazi
-		# self.sta=stazf
-		# self.fv = fv
-		# self.parte = parte
-		# self.totale = totale
-# class GVett:
 
 class ScrollView:
 	HiWhat = 53 #Doppioclick
