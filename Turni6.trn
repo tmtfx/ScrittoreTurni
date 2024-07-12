@@ -1,0 +1,174 @@
+@1000
+
+#VOC·3:0·3:10·UD·UDFS·1·1·1
+
+§Riserva·9··3:10·3:50·UDFS·UDFS··1·1·1
+
+§Parking in partenza·5·28962·3:50·4:25·UDFS·UDFS·464/MD/Viv·1·1·1
+
+?Pausa·4:25·4:32·UDFS·1·1·1
+
+§Accessori in partenza·1·28950·4:32·4:57·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Tempi medi·8·28950·4:57·5:7·UDFS·UD·464/MD/Viv·1·1·1
+
+§Cambio volante in partenza·3·28950·5:7·5:17·UD·UD·464/MD/Viv·1·1·1
+
+#VOC·5:17·5:27·UD·UDFS·1·1·1
+
+?Pausa·5:27·5:30·UDFS·1·1·1
+
+§Accessori in partenza·1·29027·5:30·5:55·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Tempi medi·8·29027·5:55·6:0·UDFS·UD·464/MD/Viv·1·1·1
+
+§Riserva·9··6:0·10:0·UD·UD··1·1·1
+
+@1001
+
+#VOC·3:0·3:10·UD·UDFS·1·1·1
+
+§Riserva·9··3:10·3:50·UDFS·UDFS··1·1·1
+
+§Parking in partenza·5·28962·3:50·4:25·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Cambio volante in partenza·3·29098·4:25·4:50·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Tempi medi·8·29098·4:50·5:0·UDFS·UD·464/MD/Viv·1·1·1
+
+§Cambio volante in partenza·3·29098·5:0·5:10·UD·UD·464/MD/Viv·1·1·1
+
+?Pausa·5:10·5:12·UD·1·1·1
+
+§Cambio volante in partenza·3·16759·5:12·5:32·UD·UD·464/MD/Viv·1·1·1
+
+?Pausa·5:32·6:0·UD·1·1·1
+
+§Riserva·9··6:0·10:0·UD·UD··1·1·1
+
+@1002
+
+§Accessori in partenza·1·16755·3:57·4:32·UD·UD·464/MD/Viv·1·1·1
+
+&16755·4:32·6:47·UD·VESL·3·464/MD/Viv·1·1·1
+
+§Parking in arrivo·6·16755·6:47·6:57·VESL·VESL·464/MD/Viv·1·1·1
+
+?Pausa·6:57·6:58·VESL·1·1·1
+
+§Cambio volante in partenza·3·16764·6:58·7:13·VESL·VESL·464/MD/Viv·1·1·1
+
+&16764·7:13·9:28·VESL·VESL·3·464/MD/Viv·1·1·1
+
+§Cambio volante in arrivo·4·16764·9:28·9:38·VESL·VESL·464/MD/Viv·1·1·1
+
+@1003
+
+§Accessori in partenza·1·16755·3:57·4:32·UD·UD·464/MD/Viv·1·1·1
+
+&16755·4:32·6:47·UD·VESL·4·464/MD/Viv·1·1·1
+
+§Parking in arrivo·6·16755·6:47·6:57·VESL·VESL·464/MD/Viv·1·1·1
+
+?Pausa·6:57·6:58·VESL·1·1·1
+
+§Cambio volante in partenza·3·16764·6:58·7:13·VESL·VESL·464/MD/Viv·1·1·1
+
+&16764·7:13·9:28·VESL·UD·4·464/MD/Viv·1·1·1
+
+§Cambio volante in arrivo·4·16764·9:28·9:38·UD·UD·464/MD/Viv·1·1·1
+
+@1004
+
+#VOC·3:57·4:7·UD·UDFS·1·1·1
+
+§Accessori in partenza·1·28949·4:7·4:37·UDFS·UDFS·Ale/Aln 501/502·1·1·1
+
+§Tempi medi·8·28949·4:37·4:42·UDFS·UD·Ale/Aln 501/502·1·1·1
+
+§Accessori in partenza·1·28949·4:42·4:47·UD·UD·Ale/Aln 501/502·1·1·1
+
+&28949·4:47·5:29·UD·SAC·3·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·28949·5:29·5:36·SAC·SAC·Ale/Aln 501/502·1·1·1
+
+&16752·5:36·6:30·SAC·UD·3·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·16752·6:30·7:0·UD·UD·Ale/Aln 501/502·1·1·1
+
+&16467·7:0·8:9·UD·TSCL·3·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·16467·8:9·8:11·TSCL·TSCL·Ale/Aln 501/502·1·1·1
+
+§Tempi medi·8·16467·8:11·8:16·TSCL·TSDL·Ale/Aln 501/502·1·1·1
+
+§Accessori in arrivo·2·16467·8:16·8:29·TSDL·TSDL·Ale/Aln 501/502·1·1·1
+
+#VOC·8:29·8:52·TSDL·TSCL·1·1·1
+
+#1894·8:52·9:54·TSCL·UD·1·1·1
+
+@1005
+
+#VOC·3:57·4:7·UD·UDFS·1·1·1
+
+§Accessori in partenza·1·28949·4:7·4:37·UDFS·UDFS·Ale/Aln 501/502·1·1·1
+
+§Tempi medi·8·28949·4:37·4:42·UDFS·UD·Ale/Aln 501/502·1·1·1
+
+§Accessori in partenza·1·28949·4:42·4:47·UD·UD·Ale/Aln 501/502·1·1·1
+
+&28949·4:47·5:29·UD·SAC·4·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·28949·5:29·5:36·SAC·SAC·Ale/Aln 501/502·1·1·1
+
+&16752·5:36·6:30·SAC·UD·4·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·16752·6:30·7:0·UD·UD·Ale/Aln 501/502·1·1·1
+
+&16467·7:0·8:9·UD·TSCL·4·Ale/Aln 501/502·1·1·1
+
+§Cambio banco·7·16467·8:9·8:11·TSCL·TSCL·Ale/Aln 501/502·1·1·1
+
+§Tempi medi·8·16467·8:11·8:16·TSCL·TSDL·Ale/Aln 501/502·1·1·1
+
+§Accessori in arrivo·2·16467·8:16·8:29·TSDL·TSDL·Ale/Aln 501/502·1·1·1
+
+#VOC·8:29·8:52·TSDL·TSCL·1·1·1
+
+#1894·8:52·9:54·TSCL·UD·1·1·1
+
+@1006
+
+#VOC·3:59·4:9·UD·UDFS·1·1·1
+
+§Accessori in partenza·1·3605·4:9·4:54·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Tempi medi·8·3605·4:54·4:58·UDFS·UD·464/MD/Viv·1·1·1
+
+§Accessori in partenza·1·3605·4:58·5:9·UD·UD·464/MD/Viv·1·1·1
+
+&3605·5:9·6:59·UD·VESL·1·464/MD/Viv·1·1·1
+
+§Cambio volante in arrivo·4·3605·6:59·7:9·VESL·VESL·464/MD/Viv·1·1·1
+
+?Pausa·7:9·7:53·VESL·1·1·1
+
+§Cambio volante in partenza·3·16770·7:53·8:13·VESL·VESL·464/MD/Viv·1·1·1
+
+&16770·8:13·10:28·VESL·VESL·1·464/MD/Viv·1·1·1
+
+§Parking in arrivo·6·16770·10:28·10:38·VESL·VESL·464/MD/Viv·1·1·1
+
+@1007
+
+#VOC·3:59·4:9·UD·UDFS·1·1·1
+
+§Accessori in partenza·1·3605·4:9·4:54·UDFS·UDFS·464/MD/Viv·1·1·1
+
+§Tempi medi·8·3605·4:54·4:58·UDFS·UD·464/MD/Viv·1·1·1
+
+§Accessori in partenza·1·3605·4:58·5:8·UD·UD·464/MD/Viv·1·1·1
+
+#VOC·5:8·5:18·UD·UDFS·1·1·1
+
