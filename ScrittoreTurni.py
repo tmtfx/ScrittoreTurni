@@ -1,11 +1,11 @@
 #!/boot/system/bin/python3
 from Be import BApplication, BWindow, BView, BMenu,BMenuBar, BMenuItem, BSeparatorItem, BMessage, window_type, B_NOT_RESIZABLE, B_CLOSE_ON_ESCAPE, B_QUIT_ON_WINDOW_CLOSE
-from Be import BButton, BTextView, BTextControl, BAlert, BListItem,BPopUpMenu,BMenuField, BListView, BScrollView,BOutlineListView, BRect, BBox, BFont, InterfaceDefs, BPath, BDirectory, BEntry, BTabView, BTab
-from Be import BNode, BStringItem, BFile, BPoint, BLooper, BHandler, BTextControl, TypeConstants, BScrollBar, BStatusBar, BStringView, BUrl, BBitmap,BLocker,BCheckBox,BQuery
-from Be import BTranslationUtils,BScreen,BAppFileInfo#,BQuery
+from Be import BButton, BTextView, BTextControl, BAlert, BListItem,BPopUpMenu,BMenuField, BListView, BScrollView,BOutlineListView, BRect, BBox, BFont, InterfaceDefs, BPath, BDirectory, BEntry
+from Be import BStringItem, BFile, BStringView,BCheckBox#BNode, TypeConstants, 
+from Be import BTranslationUtils, BBitmap
 from Be.Button import BBehavior
-from Be.NodeMonitor import *
-from Be.Node import node_ref
+#from Be.NodeMonitor import *
+#from Be.Node import node_ref
 from Be.GraphicsDefs import *
 from Be.View import *
 from Be.Menu import menu_info,get_menu_info
@@ -17,7 +17,6 @@ from Be.ListView import list_view_type
 from Be.AppDefs import *
 from Be.Font import be_plain_font, be_bold_font
 from Be import AppDefs
-# from Be.TextView import text_run, text_run_array
 from Be.FilePanel import *
 # from Be.fs_attr import attr_info
 from Be.Application import *
@@ -26,7 +25,7 @@ from Be.Menu import menu_layout
 from Be import Entry
 from Be.Entry import entry_ref, get_ref_for_path
 
-import os,datetime,time
+import os,sys,datetime,time
 glock=0
 
 cod_stazioni=[("UD","Udine"),("UDFS","Udine fascio sacca"),("BASL","Basiliano"),("CDRP","Codroipo"),("CSRS","Casarsa"),("CUS","Cusano"),("PN","Pordenone"),("FONT","Fontanafredda"),("SAC","Sacile"),("ORSG","Orsago"),("PIAN","Pianzano"),("CON","Conegliano"),("SUS","Susegana"),("SPR","Spresiano"),("LANC","Lancenigo"),("TVCL","Treviso centrale"),("TVDL","Treviso deposito"),("STRV","San Trovaso"),("PREG","Preganziol"),("MOGL","Mogliano Veneto"),("MSOS","Mestre ospedale"),("MSCL","Mestre centrale"),("MSDL","Mestre deposito"),("VEPM","Venezia porto marghera"),("VESL","Venezia Santa Lucia"),("BUT","Buttrio"),("MANZ","Manzano"),("SGAN","San Giovanni al Natisone"),("CORM","Cormons"),("GOCL","Gorizia centrale"),("SAGR","Sagrado"),("RON","Ronchi nord"),("MONF","Monfalcone"),("SIST","Sistiana"),("BVDA","Bivio d'Aurisina"),("MIRM","Miramare"),("TSCL","Trieste centrale"),("TSDL","Trieste deposito"),("TSA","Trieste airport"),("CRVG","Cervignano"),("SGIO","San Giorgio di Nogaro"),("LAT","Latisana"),("PGRU","Portogruaro"),("SSTI","San Stino di Livenza"),("SDON","San Donà di Piave"),("QUDA","Quarto d'Altino"),("SGDC","San Giovanni di Casarsa"),("SVIT","San Vito al Tagliamento"),("CORD","Cordovado Sesto"),("TEGL","Teglio veneto"),("SACL","Sacile San Liberale"),("BUDJ","Budoia"),("AVNO","Aviano"),("MONT","Montereale valcellina"),("MAN","Maniago"),("TRIC","Tricesimo"),("TARC","Tarcento"),("ARTG","Artegna"),("GEM","Gemona"),("VENZ","Venzone"),("CRNI","Carnia"),("PONT","Pontebba"),("UGOV","Ugovizza"),("TARB","Tarvisio boscoverde"),("PALM","Palmanova"),("RISN","Risano")]
@@ -1619,6 +1618,9 @@ class MainWindow(BWindow):
 		self.ofp=BFilePanel(B_OPEN_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
 		self.ofp.SetPanelDirectory("/boot/home/Desktop")
 		self.ofp.SetSaveText("Turni.trn")
+		#self.ask=BAlert('cle', "numero argomenti:"+str(len(sys.argv)), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+		#self.ask.Go()
+		#TODO: se sys.argv ha un file caricarlo
 	def FrameResized(self,x,y):
 		resiz=False
 		if x<974:
@@ -1759,7 +1761,7 @@ class MainWindow(BWindow):
 									else:
 										print("potrebbe essere un accessorio a cavallo di due giorni, pertanto questo accessorio è successivo a quello già in memoria")
 								else:
-									print("controllo se y.inizio è nel giorno precedente")
+									#print("controllo se y.inizio è nel giorno precedente")
 									if outp.inizio + datetime.timedelta(hours=24, minutes=0)-y.inizio<datetime.timedelta(hours=8,minutes=0):
 										print("potrebbe essere un accessorio a cavallo di due giorni")
 										outp=y
@@ -1778,12 +1780,12 @@ class MainWindow(BWindow):
 									#controlla che il delta non sia esagerato perché altrimenti potrebbe indicare
 									# che l'accessorio in arrivo si sviluppi su più giorni
 									dlt=y.fine-outa.fine
-									if dlt<datetime.timedelta(hours=8)
+									if dlt<datetime.timedelta(hours=8):
 										outa=y
 									else:
 										print("potrebbe essere un accessorio a cavallo di giornata, pertanto mantengo quello vecchio che casca il giorno successivo")
 								else:
-									print("controllo se y.fine è nel giorno successivo")
+									#print("controllo se y.fine è nel giorno successivo")
 									if y.fine+datetime.timedelta(hours=24)-outa.fine<datetime.timedelta(hours=8,minutes=0):
 										print("potrebbe essere un accessorio a cavallo di due giorni")
 										outa=y
@@ -1803,11 +1805,13 @@ class MainWindow(BWindow):
 								outt.append(y)
 				
 				outt.sort(key=lambda x: x.inizio)
+				print(outt)
 				def_outt = self.unisci_condotte(outt)
+				#print(def_outt)
 				#TODO: se un lowgacc non ha un corrispettivo di treno o di highgacc bisogna far risultare accessorio ultimo di partenza (magari parte un triestino o un veneziano)
-				if outp!=None:
+				#if outp!=None:
 					#print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
-				if outa!=None:
+				#if outa!=None:
 					#print("Orario ultimo accessorio in arrivo di",x[0],":",highgacc[0],highgacc[1][0])#,highgacc[2],outa)
 		elif msg.what == 1020:
 		#deseleziona listview
@@ -2670,17 +2674,26 @@ class MainWindow(BWindow):
 		o=len(outt)
 		if len(outt)>1:
 			while i<o:
-				z=i+1
+				self.z=i+1
 				while z+i<o:
-					if outt[i].fine == outt[z].inizio:
-						mergethem(outt[i],outt[z]) #unisce i due elementi creandone uno nuovo, poi lo mette al posto di outt[i] (sostituendolo)
+					if outt[i].fine == outt[self.z].inizio:
+						self.mergethem(outt,i,self.z) #unisce i due elementi creandone uno nuovo, poi lo mette al posto di outt[i] (sostituendolo)
 						o=len(outt)
-					elif (outt[z].inizio-outt[i].fine<datetime.timedelta(minutes=15)) and (outt[z].stp == outt[i].sta):
-						mergethem(outt[i],outt[z])
+					elif (outt[self.z].inizio-outt[i].fine<datetime.timedelta(minutes=15)) and (outt[self.z].stp == outt[i].sta):
+						self.mergethem(outt,i,self.z)
 						o=len(outt)
 					z+=1
 				i+=1
 		return outt
+	def mergethem(self,list,i1,i2):
+		sost=list[i1]
+		sost.partef=list[i2].partef
+		sost.totale=list[i2].totale
+		sost.fine=list[i2].fine
+		sost.sta=list[i2].sta
+		sost.label=("Condotta"+"  "+sost.name+"  "+sost.stp[0]+"  "+str(sost.inizio)+"  "+str(sost.parte)+"/"+str(sost.totale)+"  "+sost.sta[0]+"  "+str(sost.fine)+"  "+str(sost.partef)+"/"+str(sost.totale)+"  "+sost.ncond+"  "+sost.materiale)
+		del list[i2]
+		self.z-=1
 	def estrai_vett(self,s):
 		cmd=s.split("·")
 		hmp=cmd[1].split(":")
@@ -2988,6 +3001,11 @@ class App(BApplication):
 	def ReadyToRun(self):
 		self.window = MainWindow()
 		self.window.Show()
+	def ArgvReceived(self,num,args):
+		print("numero argomenti:",num)
+		self.ask=BAlert('cle', "numero argomenti:"+str(num), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+		self.ask.Go()
+		#print("argomenti:",args)
 	def RefsReceived(self, msg):
 		if msg.what == B_REFS_RECEIVED:
 			i = 0
@@ -3027,7 +3045,9 @@ class App(BApplication):
 			messaggio.AddString("name",e)
 			be_app.WindowAt(0).PostMessage(messaggio)
 			return
-		
+		elif msg.what == B_ARGV_RECEIVED:
+			self.asku=BAlert('cle', "ricevuto argv", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+			self.asku.Go()
 		BApplication.MessageReceived(self,msg)
 
 #	def Pulse(self):
@@ -3037,9 +3057,12 @@ class App(BApplication):
 
 
 def main():
-    global be_app
-    be_app = App()
-    be_app.Run()
+	global be_app
+	with open('test.txt', 'w') as writer:
+		writer.write(str(sys.argv))
+	#print(sys.argv)
+	be_app = App()
+	be_app.Run()
 	
  
 if __name__ == "__main__":
