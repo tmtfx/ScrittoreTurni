@@ -1570,7 +1570,7 @@ class MainWindow(BWindow):
 		('File', ((1, 'Carica turno'),(2, 'Salva turno'),(3, 'Distruggi turni'),(None, None),(int(AppDefs.B_QUIT_REQUESTED), 'Esci'))),('Aggiungi', ((4, 'Accessori'),(5, 'Vettura'),(6, 'Treno'),(7, 'Pausa'))),('Elaborazione', ((10, 'Estrai treni'),(11, 'Componi treni-acc'),(42, 'Crea giornate'))),
 		('Aiuto', ((8, 'Judimi'),(23, 'Informazioni')))
 		)
-	def __init__(self):
+	def __init__(self,autoload):
 		global tab,name
 		BWindow.__init__(self, BRect(50,100,1024,750), "Scrittore turni", window_type.B_TITLED_WINDOW, B_QUIT_ON_WINDOW_CLOSE) #B_NOT_RESIZABLE | B_QUIT_ON_WINDOW_CLOSE)#B_MODAL_WINDOW
 		bounds=self.Bounds()
@@ -1612,15 +1612,25 @@ class MainWindow(BWindow):
 			lab="▤"#▤⌧
 			self.deselectBtn=BButton(BRect(bckgnd_bounds.right-32,4+barheight,bckgnd_bounds.right-2,34+barheight),'DeselectBtn',lab,BMessage(1020),B_FOLLOW_TOP|B_FOLLOW_RIGHT)
 		self.box.AddChild(self.deselectBtn, None)
+		if autoload!="":
+			ofpmsg=BMessage(45371)
+			ofpmsg.AddString("path",autoload)
+			be_app.WindowAt(0).PostMessage(ofpmsg)
+			osdir=os.path.dirname(autoload)
+			osfile=os.path.basename(autoload)
+		else:
+			osdir="/boot/home/Desktop"
+			osfile="Turni.trn"
 		self.fp=BFilePanel(B_SAVE_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
-		self.fp.SetPanelDirectory("/boot/home/Desktop")
-		self.fp.SetSaveText("Turni.trn")
+		self.fp.SetPanelDirectory(osdir)
+		self.fp.SetSaveText(osfile)
 		self.ofp=BFilePanel(B_OPEN_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
-		self.ofp.SetPanelDirectory("/boot/home/Desktop")
-		self.ofp.SetSaveText("Turni.trn")
+		self.ofp.SetPanelDirectory(osdir)
+		self.ofp.SetSaveText(osfile)
 		#self.ask=BAlert('cle', "numero argomenti:"+str(len(sys.argv)), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 		#self.ask.Go()
-		#TODO: se sys.argv ha un file caricarlo
+		#se sys.argv ha un file caricarlo
+
 	def FrameResized(self,x,y):
 		resiz=False
 		if x<974:
@@ -2998,13 +3008,19 @@ class ScrollView:
 class App(BApplication):
 	def __init__(self):
 		BApplication.__init__(self, "application/x-python-Scripturn")
+		self.autoload=""
 	def ReadyToRun(self):
-		self.window = MainWindow()
+		self.window = MainWindow(self.autoload)
 		self.window.Show()
 	def ArgvReceived(self,num,args):
-		print("numero argomenti:",num)
-		self.ask=BAlert('cle', "numero argomenti:"+str(num), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
-		self.ask.Go()
+		#with open('testargvreceived.txt', 'w') as writer:
+		#	writer.write(str(args))
+		#print("numero argomenti:",num)
+		#self.ask=BAlert('cle', "numero argomenti:"+str(num), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
+		#self.ask.Go()
+		self.autoload=args[-1]
+		
+		
 		#print("argomenti:",args)
 	def RefsReceived(self, msg):
 		if msg.what == B_REFS_RECEIVED:
