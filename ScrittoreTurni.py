@@ -1648,8 +1648,7 @@ class MainWindow(BWindow):
 		self.listaturni.lv.ResizeTo(self.listaturni.sv.Bounds().Width(),self.listaturni.sv.Bounds().Height()-4)
 		BWindow.FrameResized(self,x,y)
 	def MessageReceived(self, msg):
-		if msg.what == 7:
-		#apri finestra inserimento pausa
+		if msg.what == 7:#apri finestra inserimento pausa
 			try:
 				if self.pausa_window.IsHidden():
 					self.pausa_window.Show()
@@ -1658,8 +1657,7 @@ class MainWindow(BWindow):
 				self.pausa_window = PausaWindow()
 				self.tmpWind.append(self.pausa_window)
 				self.pausa_window.Show()
-		elif msg.what == 5:
-		#apri finestra inserimento vettura
+		elif msg.what == 5:#apri finestra inserimento vettura
 			try:
 				if self.vett_window.IsHidden():
 					self.vett_window.Show()
@@ -1668,8 +1666,7 @@ class MainWindow(BWindow):
 				self.vett_window = VettWindow()
 				self.tmpWind.append(self.vett_window)
 				self.vett_window.Show()
-		elif msg.what == 6:
-		#apri finestra inserimento treno
+		elif msg.what == 6:#apri finestra inserimento treno
 			try:
 				if self.treno_window.IsHidden():
 					self.treno_window.Show()
@@ -1678,8 +1675,7 @@ class MainWindow(BWindow):
 				self.treno_window = TrenoWindow()
 				self.tmpWind.append(self.treno_window)
 				self.treno_window.Show()
-		elif msg.what == 4:
-		#apri finestra inserimento accessori
+		elif msg.what == 4:#apri finestra inserimento accessori
 			try:
 				if self.acc_window.IsHidden():
 					self.acc_window.Show()
@@ -1688,8 +1684,7 @@ class MainWindow(BWindow):
 				self.acc_window = AccWindow()
 				self.tmpWind.append(self.acc_window)
 				self.acc_window.Show()
-		elif msg.what == 10:
-		#estrai treni
+		elif msg.what == 10:#estrai treni
 			for og in self.listaturni.lv.Items():
 				if type(og)!=BStringItem:
 					if type(og)!=VettItem and type(og)!=PausItem:
@@ -1743,7 +1738,34 @@ class MainWindow(BWindow):
 						#gestiamo VettItems o PausItems #TODO
 						pass
 			#print(ntreni)
-		elif msg.what == 11:
+			#print(type(self.ntreni))
+			#print(self.ntreni)
+			sumtreni={}
+			for item in self.ntreni:
+				pnt=item[0]
+				print(pnt)
+				if not(pnt in sumtreni):
+					l=[]
+					for tur in self.listaturni.lv.Items():#self.ntreni:
+						if type(tur)==BStringItem:
+							pass
+						else:
+							if str(tur.name)==str(pnt):
+								l.append((self.listaturni.lv.Superitem(tur).Text(),tur))#fv,elemento
+					sumtreni[pnt]=l
+			#print(sumtreni)
+			#for k in sumtreni.keys():
+			try:
+				if self.estraz_window.IsHidden():
+					self.estraz_window.sumtreni=sumtreni
+					self.estraz_window.ReSet()
+					self.estraz_window.Show()
+				self.estraz_window.Activate()
+			except:
+				self.estraz_window = EstrazTreni(sumtreni)
+				self.tmpWind.append(self.estraz_window)
+				self.estraz_window.Show()
+		elif msg.what == 11:#componi treni-accessori
 			#if len(self.ntreni)>0:
 			for x in self.ntreni:
 				#lowgacc=(datetime.timedelta(hours=23,minutes=59),(None,None),2,0)#2 è parte turno, esempio. se accessori iniziano alle 23.50, ma il cambio volante inizia alle 00:10 i primi tempi accessori sono 23:50
@@ -1823,11 +1845,9 @@ class MainWindow(BWindow):
 					#print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
 				#if outa!=None:
 					#print("Orario ultimo accessorio in arrivo di",x[0],":",highgacc[0],highgacc[1][0])#,highgacc[2],outa)
-		elif msg.what == 1020:
-		#deseleziona listview
+		elif msg.what == 1020:#deseleziona listview
 			self.listaturni.lv.DeselectAll()
-		elif msg.what == 1800:
-		#controlla nome turno
+		elif msg.what == 1800:#controlla nome turno
 			try:
 				int(self.turno.Text())
 				self.turno.MarkAsInvalid(False)
@@ -1835,8 +1855,7 @@ class MainWindow(BWindow):
 			except:
 				self.turno.MarkAsInvalid(True)
 				self.addBtn.SetEnabled(False)
-		elif msg.what == 1801:
-		#aggiungi turno
+		elif msg.what == 1801:#aggiungi turno
 			#controlla se c'è già turno
 			chk=True
 			for tur in self.listaturni.lv.Items():
@@ -1872,15 +1891,13 @@ class MainWindow(BWindow):
 			v=int(self.turno.Text())
 			v+=1
 			self.turno.SetText(str(v))
-		elif msg.what == 1802:
-		#rimuovi turno
+		elif msg.what == 1802:#rimuovi turno
 			if self.listaturni.lv.CountItems()>0:
 				if self.listaturni.lv.CurrentSelection()>-1:
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CurrentSelection()))
 				else:
 					self.listaturni.lv.RemoveItem(self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
-		elif msg.what == 3:
-		#rimuovi turni
+		elif msg.what == 3:#rimuovi turni
 			if self.listaturni.lv.CountItems()>0:
 				ask=BAlert('rem', "Questa operazione non è reversibile: rimuovere tutti i turni?", 'Sì', 'No',None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 				self.alertWind.append(ask)
@@ -1888,14 +1905,11 @@ class MainWindow(BWindow):
 				if not ret:
 					for g in self.listaturni.lv.Items():
 						self.listaturni.lv.RemoveItem(g)
-		elif msg.what == 2:
-		#pannello salva file turni
+		elif msg.what == 2:#pannello salva file turni
 			self.fp.Show()
-		elif msg.what == 1:
-		#pannello apri file turni
+		elif msg.what == 1:#pannello apri file turni
 			self.ofp.Show()
-		elif msg.what == 45371:
-			#carica turni
+		elif msg.what == 45371:#carica turni
 			ofpath=msg.FindString("path")
 			tlist=[]
 			with open(ofpath) as f:
@@ -1939,8 +1953,7 @@ class MainWindow(BWindow):
 					if cis!=0:
 						self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(trn),self.listaturni.lv.IndexOf(thisroot)+cis+1)
 				i+=1
-		elif msg.what == 54173:
-			#Salva turni
+		elif msg.what == 54173:#Salva turni
 			b=entry_ref()
 			self.fp.GetPanelDirectory(b)
 			c=BEntry(b)
@@ -1968,9 +1981,8 @@ class MainWindow(BWindow):
 						txt="#"+ita.name+"·"+ita.iout+"·"+ita.fout+"·"+ita.stp[0]+"·"+ita.sta[0]+"·"+str(ita.parte)+"·"+str(ita.partef)+"·"+str(ita.totale)+"\n"
 					i+=1
 					myfile.write(txt)
-		elif msg.what == 1001:
+		elif msg.what == 1001:#aggiungi pausa
 			#print("1001 inserimento pausa")
-		#aggiungi pausa
 			dm=msg.FindInt8("deltam")
 			do=msg.FindInt8("deltao")
 			#parte=msg.FindInt8("parte")
@@ -2099,9 +2111,8 @@ class MainWindow(BWindow):
 			titm=self.listaturni.lv.Superitem(itm)
 			self.listaturni.lv.AddUnder(vet,titm)
 			self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(vet),self.listaturni.lv.IndexOf(titm)+cit+2)
-		elif msg.what == 1333:
+		elif msg.what == 1333:#aggiungi treno
 			# print("1333 inserimento treno con accessori")
-		#aggiungi treno
 			oip=msg.FindInt8("oip")
 			# print("Step parziale")
 			oit=msg.FindInt8("oit")
@@ -2370,9 +2381,8 @@ class MainWindow(BWindow):
 						if aa:
 							self.listaturni.lv.AddUnder(acca,fvt)
 							self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(acca),self.listaturni.lv.CountItems()-1)	
-		elif msg.what == 1002:
+		elif msg.what == 1002:#aggiungi vettura
 			# print("1002 inserimento vettura")
-		#aggiungi vettura
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
 			oa=msg.FindInt8("of")
@@ -2522,9 +2532,8 @@ class MainWindow(BWindow):
 					else:
 						# print("step 4, niente selezionato, ultimo oggetto è turno") # verificare che succede se questo e precedente sono collassati e non selezionati
 						self.listaturni.lv.AddUnder(vet,self.listaturni.lv.ItemAt(self.listaturni.lv.CountItems()-1))
-		elif msg.what == 1003:
+		elif msg.what == 1003:#aggiungi accessori
 			# print("1003 inserimento accessori")
-		#aggiungi accessori
 			op=msg.FindInt8("oi")
 			mp=msg.FindInt8("mi")
 			oa=msg.FindInt8("of")
@@ -2780,6 +2789,67 @@ class MainWindow(BWindow):
 					wind.Quit()
 		return BWindow.QuitRequested(self)
 
+class EstrazTreni(BWindow):
+	def __init__(self,sumtreni):
+		BWindow.__init__(self, BRect(50,100,800,600), "Estrazione turni", window_type.B_TITLED_WINDOW, B_QUIT_ON_WINDOW_CLOSE) #B_NOT_RESIZABLE | B_QUIT_ON_WINDOW_CLOSE)#B_MODAL_WINDOW
+		bounds=self.Bounds()
+		self.bckgnd = BView(self.Bounds(), "background_View", 8, 20000000)
+		self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
+		bckgnd_bounds=self.bckgnd.Bounds()
+		self.AddChild(self.bckgnd,None)
+		self.listatreni = Scrolltrains(BRect(4 , 4, bounds.Width()/3- 18, bounds.Height() - 4 ), 'Scrolltrains')
+		self.listafv = ScrollFv(BRect(bounds.Width()/3- 14 , 4, bounds.Width()*2/3- 18, bounds.Height() - 4 ), 'ScrollFVs')
+		self.listael = ScrollView(BRect(bounds.Width()*2/3 - 14 , 4, bounds.Width()- 18, bounds.Height() - 4 ), 'Scrollelements')
+		self.bckgnd.AddChild(self.listatreni.sv,None)
+		self.bckgnd.AddChild(self.listafv.sv,None)
+		self.bckgnd.AddChild(self.listael.sv,None)
+		self.sumtreni=sumtreni
+		for k in self.sumtreni.keys():
+			self.listatreni.lv.AddItem(BStringItem(str(k)))
+		#for k in self.sumtreni.Keys():
+	def ReSet(self):
+		if self.listatreni.lv.CountItems()>0:
+			self.listatreni.lv.RemoveItems(0,self.listatreni.lv.CountItems())
+		if self.listafv.lv.CountItems()>0:
+			self.listafv.lv.RemoveItems(0,self.listafv.lv.CountItems())
+		if self.listael.lv.CountItems()>0:
+			self.listael.lv.RemoveItems(0,self.listael.lv.CountItems())
+		for k in self.sumtreni.keys():
+			self.listatreni.lv.AddItem(BStringItem(str(k)))
+	def MessageReceived(self, msg):
+		if msg.what==774:
+			#clear listafv.lv e listael.lv
+			#popola listafv
+		elif msg.what == 884:
+			#clea listael.lv
+			#popola listael.lv
+		elif msg.what == 53:
+			#apri finestra dettagli elemento
+	def QuitRequested(self):
+		self.Hide()
+
+class ScrollFv:
+	HiWhat = 883
+	SectionSelection = 884
+	def __init__(self, rect, name):
+		self.lv = BListView(rect, name, list_view_type.B_SINGLE_SELECTION_LIST)#B_MULTIPLE_SELECTION_LIST
+		self.lv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
+		self.lv.SetSelectionMessage(BMessage(self.SectionSelection))
+		self.lv.SetInvocationMessage(BMessage(self.HiWhat))
+		self.sv = BScrollView(name, self.lv,B_FOLLOW_NONE,0,False,True,border_style.B_FANCY_BORDER)
+		self.sv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
+
+class Scrolltrains:
+	HiWhat = 773
+	SectionSelection = 774
+	def __init__(self, rect, name):
+		self.lv = BListView(rect, name, list_view_type.B_SINGLE_SELECTION_LIST)#B_MULTIPLE_SELECTION_LIST
+		self.lv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
+		self.lv.SetSelectionMessage(BMessage(self.SectionSelection))
+		self.lv.SetInvocationMessage(BMessage(self.HiWhat))
+		self.sv = BScrollView(name, self.lv,B_FOLLOW_NONE,0,False,True,border_style.B_FANCY_BORDER)
+		self.sv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
+
 
 class TrenoItem(BListItem):
 	# (n,dtp,dta,(csp,nsp),(csa,nsa),(ncond,ccond),materiale,(parte,totale))
@@ -3018,7 +3088,7 @@ class App(BApplication):
 		#print("numero argomenti:",num)
 		#self.ask=BAlert('cle', "numero argomenti:"+str(num), 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 		#self.ask.Go()
-		self.autoload=args[-1]
+		self.autoload=args[-1]# argvReceived is executed before readytorun, we pass the last argument
 		
 		
 		#print("argomenti:",args)
@@ -3074,8 +3144,8 @@ class App(BApplication):
 
 def main():
 	global be_app
-	with open('test.txt', 'w') as writer:
-		writer.write(str(sys.argv))
+	#with open('test.txt', 'w') as writer:
+	#	writer.write(str(sys.argv))
 	#print(sys.argv)
 	be_app = App()
 	be_app.Run()
