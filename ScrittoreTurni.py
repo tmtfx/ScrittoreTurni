@@ -1860,7 +1860,8 @@ class MainWindow(BWindow):
 			chk=True
 			for tur in self.listaturni.lv.Items():
 				if type(tur)==BStringItem:
-					if tur.Text() == self.turno.Text():
+					print(tur.Text(),self.turno.Text())
+					if int(tur.Text()) == int(self.turno.Text()):
 						chk=False
 						ask=BAlert('cle', "Questo turno c\'è già", 'Ok', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_STOP_ALERT)
 						self.alertWind.append(ask)
@@ -1888,9 +1889,21 @@ class MainWindow(BWindow):
 					self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(bli),self.listaturni.lv.CountItems()-1)
 					
 				self.listaturni.lv.DeselectAll()
+			#looking for first successive available
+			boo=True
 			v=int(self.turno.Text())
-			v+=1
-			self.turno.SetText(str(v))
+			while boo:
+				x=0
+				while x<self.listaturni.lv.CountItems():
+					tur=self.listaturni.lv.ItemAt(x)
+					if type(tur)==BStringItem:
+						if int(tur.Text()) == v:
+							v+=1
+							break
+					x+=1
+					if x==self.listaturni.lv.CountItems():
+						boo=False
+						self.turno.SetText(str(v))
 		elif msg.what == 1802:#rimuovi turno
 			if self.listaturni.lv.CountItems()>0:
 				if self.listaturni.lv.CurrentSelection()>-1:
@@ -2849,6 +2862,7 @@ class EstrazTreni(BWindow):
 			#ss	print([x for y in self.fvs for x in y])
 			#popola listael.lv
 		elif msg.what == 53:
+			#TODO
 			pass
 			#apri finestra dettagli elemento
 	def QuitRequested(self):
