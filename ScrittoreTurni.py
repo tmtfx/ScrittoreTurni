@@ -1755,10 +1755,10 @@ class MainWindow(BWindow):
 					sumtreni[pnt]=l
 			#print(sumtreni)
 			#for k in sumtreni.keys():
+			#print(sumtreni)
 			try:
 				if self.estraz_window.IsHidden():
-					self.estraz_window.sumtreni=sumtreni
-					self.estraz_window.ReSet()
+					self.estraz_window.ReSet(sumtreni)
 					self.estraz_window.Show()
 				self.estraz_window.Activate()
 			except:
@@ -2798,16 +2798,17 @@ class EstrazTreni(BWindow):
 		bckgnd_bounds=self.bckgnd.Bounds()
 		self.AddChild(self.bckgnd,None)
 		self.listatreni = Scrolltrains(BRect(4 , 4, bounds.Width()/3- 18, bounds.Height() - 4 ), 'Scrolltrains')
-		self.listafv = ScrollFv(BRect(bounds.Width()/3- 14 , 4, bounds.Width()*2/3- 18, bounds.Height() - 4 ), 'ScrollFVs')
-		self.listael = ScrollView(BRect(bounds.Width()*2/3 - 14 , 4, bounds.Width()- 18, bounds.Height() - 4 ), 'Scrollelements')
+		self.listafv = ScrollFv(BRect(bounds.Width()/3 , 4, bounds.Width()*2/3- 18, bounds.Height() - 4 ), 'ScrollFVs')
+		self.listael = ScrollElement(BRect(bounds.Width()*2/3 , 4, bounds.Width()- 18, bounds.Height() - 4 ), 'Scrollelements')
 		self.bckgnd.AddChild(self.listatreni.sv,None)
 		self.bckgnd.AddChild(self.listafv.sv,None)
 		self.bckgnd.AddChild(self.listael.sv,None)
 		self.sumtreni=sumtreni
 		for k in self.sumtreni.keys():
 			self.listatreni.lv.AddItem(BStringItem(str(k)))
+		self.fvs=[]
 		#for k in self.sumtreni.Keys():
-	def ReSet(self):
+	def ReSet(self,sumtreni):
 		if self.listatreni.lv.CountItems()>0:
 			self.listatreni.lv.RemoveItems(0,self.listatreni.lv.CountItems())
 		if self.listafv.lv.CountItems()>0:
@@ -2816,17 +2817,53 @@ class EstrazTreni(BWindow):
 			self.listael.lv.RemoveItems(0,self.listael.lv.CountItems())
 		for k in self.sumtreni.keys():
 			self.listatreni.lv.AddItem(BStringItem(str(k)))
+		self.sumtreni=sumtreni
+		for k in self.sumtreni.keys():
+			self.listatreni.lv.AddItem(BStringItem(str(k)))
 	def MessageReceived(self, msg):
 		if msg.what==774:
-			#clear listafv.lv e listael.lv
-			#popola listafv
+			if self.listafv.lv.CountItems()>0:
+				self.listafv.lv.RemoveItems(0,self.listafv.lv.CountItems())
+			if self.listael.lv.CountItems()>0:
+				self.listael.lv.RemoveItems(0,self.listael.lv.CountItems())
+			self.fvs = self.sumtreni[int(self.listatreni.lv.ItemAt(self.listatreni.lv.CurrentSelection()).Text())]
+			for fv in self.fvs:
+				if self.listafv.lv.CountItems()>0:
+					doit=True
+					for items in self.listafv.lv.Items():
+						if items.Text()==str(fv[0]):
+							doit = False
+							break
+					if doit:
+						self.listafv.lv.AddItem(BStringItem(str(fv[0])))
+				else:
+					self.listafv.lv.AddItem(BStringItem(str(fv[0])))
 		elif msg.what == 884:
-			#clea listael.lv
+			if self.listael.lv.CountItems()>0:
+				self.listael.lv.RemoveItems(0,self.listael.lv.CountItems())
+			print(self.fvs)
+			for x in self.fvs:
+				if str(x[0])==self.listafv.lv.ItemAt(self.listafv.lv.CurrentSelection()).Text():
+					self.listael.lv.AddItem(x[1])
+				 
+			#ss	print([x for y in self.fvs for x in y])
 			#popola listael.lv
 		elif msg.what == 53:
+			pass
 			#apri finestra dettagli elemento
 	def QuitRequested(self):
 		self.Hide()
+
+class ScrollElement:
+	HiWhat = 53
+	SectionSelection = 54
+	def __init__(self, rect, name):
+		self.lv = BListView(rect, name, list_view_type.B_SINGLE_SELECTION_LIST)#B_MULTIPLE_SELECTION_LIST
+		self.lv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
+		self.lv.SetSelectionMessage(BMessage(self.SectionSelection))
+		self.lv.SetInvocationMessage(BMessage(self.HiWhat))
+		self.sv = BScrollView(name, self.lv,B_FOLLOW_NONE,0,False,True,border_style.B_FANCY_BORDER)
+		self.sv.SetResizingMode(B_FOLLOW_TOP_BOTTOM)
 
 class ScrollFv:
 	HiWhat = 883
