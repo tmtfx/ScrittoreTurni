@@ -1703,43 +1703,21 @@ class MainWindow(BWindow):
 							if go:
 								#il treno non è in ntreni
 								self.ntreni.append((num,[]))
-								#if type(og) == TrenoItem:
-								#	#print(self.listaturni.lv.Superitem(og).Text())
-								#	#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-								#	#ntreni[-1][1].append(oggetto)
-								#	oggetto=og
-								#elif type(og) == AccItem:
-								#	#print(self.listaturni.lv.Superitem(og).Text())
-								#	#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),og.int(totale))
-								#	oggetto=og
-								self.ntreni[-1][1].append(og)#getto)
-							#elif type(og) == VettItem:
-							#	oggetto=GVett(
-							
+								self.ntreni[-1][1].append(og)
 							else:
 								#il treno esiste in ntreni
 								match=[x for x in self.ntreni if x[0] == num]
-								#if type(og) == TrenoItem:
-								#	#oggetto=GTreno(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-								#	##match[0][1].append(oggetto)
-								#	oggetto = og
-								#elif type(og) == AccItem:
-								#	#oggetto=GAcc(num,og.inizio,og.stp,og.fine,og.sta,int(self.listaturni.lv.Superitem(og).Text()),int(og.parte),int(og.totale))
-								#	oggetto = og
-								#match[0][1].append(oggetto)
 								match[0][1].append(og)
 						except:
 						#	print(og.label)
 						#	#si tratta di Riserva #TODO
+							print("eccezione da Riserva?")
 							pass
 							#if type(og) == VettItem:
 							#	nam = og.name
 					else:
 						#gestiamo VettItems o PausItems #TODO
 						pass
-			#print(ntreni)
-			#print(type(self.ntreni))
-			#print(self.ntreni)
 			sumtreni={}
 			for item in self.ntreni:
 				pnt=item[0]
@@ -1753,9 +1731,6 @@ class MainWindow(BWindow):
 							if str(tur.name)==str(pnt):
 								l.append((self.listaturni.lv.Superitem(tur).Text(),tur))#fv,elemento
 					sumtreni[pnt]=l
-			#print(sumtreni)
-			#for k in sumtreni.keys():
-			#print(sumtreni)
 			try:
 				if self.estraz_window.IsHidden():
 					self.estraz_window.ReSet(sumtreni)
@@ -1777,7 +1752,7 @@ class MainWindow(BWindow):
 				outp=None
 				outa=None
 				outt=[]
-				
+				print(x[1])
 				for y in x[1]:
 					if type(y)==AccItem:
 						if int(y.codacc) in [ 1, 3, 5 ]: #se è un accessorio in partenza
@@ -1797,6 +1772,7 @@ class MainWindow(BWindow):
 									if outp.inizio + datetime.timedelta(hours=24, minutes=0)-y.inizio<datetime.timedelta(hours=8,minutes=0):
 										print("potrebbe essere un accessorio a cavallo di due giorni")
 										outp=y
+								
 							#if int(y.parte) < lowgacc[2]:
 							#	lowgacc=(y.inizio,y.stp,int(y.parte),self.listaturni.lv.Superitem(y).Text())
 							#	outp=y
@@ -1829,17 +1805,25 @@ class MainWindow(BWindow):
 							#		highgacc=(y.fine,y.sta,int(y.parte),self.listaturni.lv.Superitem(y).Text())
 							#		outa=y
 					elif type(y)==TrenoItem:
-						for item in outt:
-							if (item.inizio == y.inizio) and ( item.fine == y.fine ):
-								print("elemento già inserito")
-								pass
-							else:
-								outt.append(y)
+						#riscrivere questo pezzo
+						#bisogna inserire in outt tutti gli y (se non sono uguali a elementi già inseriti)
+						if len(outt)>0:
+							for item in outt:
+								if (item.inizio == y.inizio) and ( item.fine == y.fine ):
+									print("elemento già inserito")
+									pass
+								else:
+									outt.append(y)
+						else:
+							outt.append(y)
+				
+				print(outp)
+				print(outa)
 				
 				outt.sort(key=lambda x: x.inizio)
-				print(outt)
+				print("outt",outt)
 				def_outt = self.unisci_condotte(outt)
-				#print(def_outt)
+				print("def_outt",def_outt)
 				#TODO: se un lowgacc non ha un corrispettivo di treno o di highgacc bisogna far risultare accessorio ultimo di partenza (magari parte un triestino o un veneziano)
 				#if outp!=None:
 					#print("Orario primo accessorio in partenza di",x[0],":",lowgacc[0],lowgacc[1][0])#,lowgacc[2],outp)
@@ -1889,7 +1873,7 @@ class MainWindow(BWindow):
 					self.listaturni.lv.MoveItem(self.listaturni.lv.IndexOf(bli),self.listaturni.lv.CountItems()-1)
 					
 				self.listaturni.lv.DeselectAll()
-			#looking for first successive available
+			#looking for first fv available
 			boo=True
 			v=int(self.turno.Text())
 			while boo:
